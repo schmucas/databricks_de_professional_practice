@@ -1,0 +1,20 @@
+# # The main pipeline for databricks_de_professional_practice
+
+# resources:
+#   pipelines:
+#     databricks_de_professional_practice_etl:
+#       name: databricks_de_professional_practice_etl
+#       catalog: ${var.catalog}
+#       schema: ${var.schema}
+#       serverless: true
+#       root_path: "../src/databricks_de_professional_practice_etl"
+
+#       libraries:
+#         - glob:
+#             include: ../src/databricks_de_professional_practice_etl/transformations/**
+
+#       environment:
+#         dependencies:
+#           # We include every dependency defined by pyproject.toml by defining an editable environment
+#           # that points to the folder where pyproject.toml is deployed.
+#           - --editable ${workspace.file_path}

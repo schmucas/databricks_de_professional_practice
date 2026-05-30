@@ -1,0 +1,15 @@
+# the environment setup job for databricks_de_professional_practice.
+
+resources:
+  jobs:
+    setup_job:
+      name: setup_job
+
+      parameters:
+        - name: env
+          default: ${var.env}
+
+      tasks:
+        - task_key: notebook_task
+          notebook_task:
+            notebook_path: ../src/setup/environment_setup.ipynb

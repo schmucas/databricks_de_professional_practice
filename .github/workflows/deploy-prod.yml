@@ -1,0 +1,30 @@
+name: Deploy → Prod
+
+on:
+  push:
+    tags:
+      - 'v*'   # catches all version tags; RC tags are excluded by the job condition below
+
+jobs:
+  deploy-prod:
+    name: Deploy to prod
+    runs-on: ubuntu-latest
+    # Skip RC tags (v*-rc*) — those are handled by deploy-stage.yml
+    if: ${{ !contains(github.ref_name, '-rc') }}
+
+    # This references a GitHub Environment named "production".
+    # Go to Settings → Environments → New environment → "production"
+    # and add Required reviewers to enforce an approval gate before deploy.
+    environment: production
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Deploy bundle (prod)
+        run: databricks bundle deploy --target prod
