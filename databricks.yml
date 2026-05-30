@@ -20,28 +20,18 @@ targets:
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
-    workspace:
-      host: ${{ secrets.DATABRICKS_HOST }}
     variables:
       env: dev
   stage:
     mode: production
     workspace:
-      host: ${{ secrets.DATABRICKS_HOST }}
       root_path: /Workspace/Shared/${bundle.target}/${bundle.name}
     variables:
       env: stage
-    permissions:
-      - user_name: 
-        level: CAN_MANAGE
   prod:
     mode: production
     workspace:
-      host: ${{ secrets.DATABRICKS_HOST }}
       root_path: /Workspace/Shared/${bundle.target}/${bundle.name}
 
     variables:
       env: prod
-    permissions:
-      - user_name: 
-        level: CAN_MANAGE
