@@ -30,6 +30,8 @@ targets:
       env: dev
   stage:
     mode: production
+    presets:
+      name_prefix: 'stage_'
     permissions:
     - user_name: ${var.workspace_user}
       level: CAN_MANAGE
@@ -39,6 +41,8 @@ targets:
       env: stage
   prod:
     mode: production
+    presets:
+      name_prefix: 'prod_'
     permissions:
     - user_name: ${var.workspace_user}
       level: CAN_MANAGE
