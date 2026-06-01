@@ -13,6 +13,7 @@ variables:
     description: The environment to use
   workspace_user:
     description: Databricks workspace username
+    default: ${workspace.current_user.userName}
 
 targets:
   dev:

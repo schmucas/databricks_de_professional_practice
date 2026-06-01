@@ -11,7 +11,7 @@ from pyspark.sql.functions import col, sum
 def sample_zones_databricks_de_professional_practice():
     # Read from the "sample_trips" table, then sum all the fares
     return (
-        spark.read.table(f"sample_trips_databricks_de_professional_practice")
+        spark.read.table("sample_trips_databricks_de_professional_practice")
         .groupBy(col("pickup_zip"))
         .agg(sum("fare_amount").alias("total_fare"))
     )
