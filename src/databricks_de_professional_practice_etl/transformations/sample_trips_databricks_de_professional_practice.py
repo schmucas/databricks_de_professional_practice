@@ -1,5 +1,4 @@
 from pyspark import pipelines as dp
-from pyspark.sql.functions import col
 
 
 # This file defines a sample transformation.

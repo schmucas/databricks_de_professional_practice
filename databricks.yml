@@ -13,6 +13,7 @@ variables:
     description: The environment to use
   workspace_user:
     description: Databricks workspace username
+    default: ${workspace.current_user.userName}
 
 targets:
   dev:
@@ -21,6 +22,9 @@ targets:
     # - Any job schedules and triggers are paused by default.
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
+    permissions:
+    - user_name: ${var.workspace_user}
+      level: CAN_MANAGE
     default: true
     variables:
       env: dev
