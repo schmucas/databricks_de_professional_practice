@@ -22,7 +22,7 @@ dev = [
 
 [tool.ruff]
 line-length = 120
+builtins = ["spark", "dbutils", "display", "sc", "table"]
 
 [tool.ruff.lint]
 ignore = ["F403", "F405"]
-builtins = ["spark", "dbutils", "display", "sc", "table"]

@@ -11,6 +11,8 @@ include:
 variables:
   env:
     description: The environment to use
+  workspace_user:
+    description: Databricks workspace username
 
 targets:
   dev:
@@ -20,16 +22,26 @@ targets:
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
+    permissions:
+    - user_name: ${var.workspace_user}
+      level: CAN_MANAGE
+
     variables:
       env: dev
   stage:
     mode: production
+    permissions:
+    - user_name: ${var.workspace_user}
+      level: CAN_MANAGE
     workspace:
       root_path: /Workspace/Shared/${bundle.target}/${bundle.name}
     variables:
       env: stage
   prod:
     mode: production
+    permissions:
+    - user_name: ${var.workspace_user}
+      level: CAN_MANAGE
     workspace:
       root_path: /Workspace/Shared/${bundle.target}/${bundle.name}
 
