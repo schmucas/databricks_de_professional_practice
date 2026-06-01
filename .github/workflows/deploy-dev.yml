@@ -13,7 +13,6 @@ jobs:
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-      BUNDLE_VAR_workspace_user: ${{ secrets.DATABRICKS_USER }}
 
     steps:
       - uses: actions/checkout@v4
