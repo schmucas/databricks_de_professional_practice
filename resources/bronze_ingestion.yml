@@ -1,0 +1,33 @@
+# the environment setup job for databricks_de_professional_practice.
+
+resources:
+  jobs:
+    bronze_ingestion_job:
+      name: bronze_ingestion
+      
+
+      parameters:
+        - name: env
+          default: ${var.env}
+
+      tasks:
+        - task_key: from_delta_customers
+          notebook_task:
+            notebook_path: ../src/ingestion/from_delta/customers.ipynb
+        
+        - task_key: from_delta_orders
+          notebook_task:
+            notebook_path: ../src/ingestion/from_delta/orders.ipynb
+        
+        - task_key: from_json_orders_cdc
+          notebook_task:
+            notebook_path: ../src/ingestion/from_json/orders_cdc.ipynb
+        
+        - task_key: from_delta_shipment_events
+          notebook_task:
+            notebook_path: ../src/ingestion/from_json/shipment_events.ipynb
+        
+        - task_key: from_delta_telemetry
+          notebook_task:
+            notebook_path: ../src/ingestion/from_json/telemetry.ipynb
+            

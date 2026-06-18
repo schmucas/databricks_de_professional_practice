@@ -10,6 +10,6 @@ resources:
           default: ${var.env}
 
       tasks:
-        - task_key: notebook_task
+        - task_key: setup_task
           notebook_task:
             notebook_path: ../src/setup/environment_setup.ipynb
