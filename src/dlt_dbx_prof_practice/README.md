@@ -13,8 +13,8 @@ To get started, go to the `transformations` folder -- most of the relevant sourc
 
 * By convention, every dataset under `transformations` is in a separate file.
 * Take a look at the sample called "sample_trips_databricks_de_professional_practice.py" to get familiar with the syntax.
-  Read more about the syntax at https://docs.databricks.com/dlt/python-ref.html.
+  Read more about the syntax at https://docs.databricks.com/aws/en/ldp/developer/python-ref.
 * If you're using the workspace UI, use `Run file` to run and preview a single transformation.
 * If you're using the CLI, use `databricks bundle run databricks_de_professional_practice_etl --select sample_trips_databricks_de_professional_practice` to run a single transformation.
 
-For more tutorials and reference material, see https://docs.databricks.com/dlt.
+For more tutorials and reference material, see https://docs.databricks.com/aws/en/ldp.
