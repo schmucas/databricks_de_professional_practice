@@ -23,11 +23,11 @@ resources:
           notebook_task:
             notebook_path: ../src/ingestion/from_json/orders_cdc.ipynb
         
-        - task_key: from_delta_shipment_events
+        - task_key: from_json_shipment_events
           notebook_task:
             notebook_path: ../src/ingestion/from_json/shipment_events.ipynb
         
-        - task_key: from_delta_telemetry
+        - task_key: from_json_telemetry
           notebook_task:
             notebook_path: ../src/ingestion/from_json/telemetry.ipynb
             
