@@ -7,12 +7,34 @@
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 ![pytest](https://img.shields.io/badge/tested_with-pytest-0A9EDC?logo=pytest&logoColor=white)
 ![uv](https://img.shields.io/badge/packaging-uv-DE5FE9)
+![status](https://img.shields.io/badge/status-work%20in%20progress-F5A623)
+![progress](https://img.shields.io/badge/progress-~25%25-F5A623)
 
 > A production-grade data engineering project built on Databricks — fully automated, fully tested, running on the free tier.
 
 This project covers the complete data engineering lifecycle end-to-end: ingestion from multiple source types, medallion architecture with both **Delta Live Tables** and **traditional PySpark**, Change Data Capture, data quality, performance optimisation, environment separation, and a fully wired CI/CD pipeline that deploys automatically to Databricks on every Git event — no manual steps required.
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
+
+> 🚧 **Work in progress.** The platform foundation — repo structure, environment separation, CI/CD, and Bronze ingestion — is in place. The transformation layers and benchmark dashboard are next.
+
+## Project status — ~25%
+
+`██████░░░░░░░░░░░░░░░░░░░░` **~25% complete**
+
+| Component | Status |
+|---|---|
+| Repo structure & Databricks Asset Bundles | ✅ Done |
+| Git integration & CI/CD — PR checks → dev → stage → prod | ✅ Done |
+| Environment separation — catalogs + bundle targets | ✅ Done |
+| Source data generation — setup notebook | ✅ Done |
+| 🥉 Bronze ingestion — Auto Loader + CDF | ✅ Done |
+| 🔄 Incremental data generator | 🚧 In progress |
+| 🥈 Silver — Lakeflow Declarative Pipelines + PySpark | ⬜ Planned |
+| 🥇 Gold — both tracks | ⬜ Planned |
+| Data quality / expectations | ⬜ Planned |
+| 📊 Benchmark dashboard — DLT vs PySpark | ⬜ Planned |
+| Integration tests | ⬜ Planned |
 
 ---
 
