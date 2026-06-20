@@ -1,0 +1,15 @@
+# the environment setup job for databricks_de_professional_practice.
+
+resources:
+  jobs:
+    load_new_source_data:
+      name: load_new_source_data
+
+      parameters:
+        - name: env
+          default: ${var.env}
+
+      tasks:
+        - task_key: load_new_source_data
+          notebook_task:
+            notebook_path: ../src/setup/incremental_data_generator.ipynb
