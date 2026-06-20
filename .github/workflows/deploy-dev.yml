@@ -3,7 +3,7 @@ name: Deploy → Dev
 on:
   push:
     branches:
-      - main  # TODO: verify this matches your trunk branch name
+      - main
 
 jobs:
   deploy-dev:
