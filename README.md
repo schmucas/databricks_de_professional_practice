@@ -1,4 +1,4 @@
-# Databricks DE Professional Practice
+# Databricks Data Engineering Platform
 
 ![Databricks](https://img.shields.io/badge/Databricks-FF3621?logo=databricks&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
@@ -11,6 +11,8 @@
 ![progress](https://img.shields.io/badge/progress-~25%25-F5A623)
 
 > A production-grade data engineering project built on Databricks — fully automated, fully tested, running on the free tier.
+
+_Started as Databricks DE Professional exam practice — grown into a full, production-style platform build._
 
 This project covers the complete data engineering lifecycle end-to-end: ingestion from multiple source types, medallion architecture built both ways — with **Lakeflow Declarative Pipelines** (formerly Delta Live Tables, "DLT") and **traditional PySpark** — Change Data Capture, data quality, performance optimisation, environment separation, and a fully wired CI/CD pipeline that deploys automatically to Databricks on every Git event — no manual steps required.
 
