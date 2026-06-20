@@ -194,7 +194,7 @@ flowchart LR
 
 ## Keeping the data messy: the incremental generator
 
-The initial seed is static, but real pipelines face a moving target. A second notebook, `incremental_data_generator.ipynb`, runs **before each pipeline execution** and advances the dataset: it appends a new batch to the `sl_ingest` sources and, on demand, injects schema drift, bad records, duplicates and late-arriving data. Every run is logged to a `_generator_runs` tracking table that doubles as **persistent state**: once a column drifts in, the table records it so the next run keeps emitting it, exactly like a real upstream change.
+The initial seed is static, but real pipelines face a moving target. A second notebook, `incremental_data_generator.ipynb`, runs **before each pipeline execution** and advances the dataset: it appends a new batch to the `sl_ingest` sources and can inject realistic mess. Two controls keep this deliberate. **Probabilistic anomalies** (bad records, duplicates, late data) are toggled per dataset and hit a small random share of rows. **Schema drift** is an explicit per-table choice (`DRIFT_THIS_RUN`) that adds one new column at a time, deterministically. Every run is logged to a `_generator_runs` tracking table that doubles as **persistent state**: once a column drifts in, the table records it so the next run keeps emitting it, exactly like a real upstream change.
 
 Wired as a shared seed step, it runs once and both tracks consume the fresh batch:
 
