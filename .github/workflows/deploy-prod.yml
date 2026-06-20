@@ -17,9 +17,6 @@ jobs:
     # Skip RC tags (v*-rc*) — those are handled by deploy-stage.yml
     if: ${{ !contains(github.ref_name, '-rc') }}
 
-    # This references a GitHub Environment named "production".
-    # Go to Settings → Environments → New environment → "production"
-    # and add Required reviewers to enforce an approval gate before deploy.
     environment: production
 
     env:
