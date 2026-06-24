@@ -342,7 +342,7 @@ The following are real production concerns but are deliberately not part of this
 
 | Area | Notes |
 |---|---|
-| **DDL / table management as IaC** | Catalog, schema, and table definitions are bootstrapped via a setup notebook resp. via job parameters (INITIAL_SETUP), not managed declaratively. In production I would put this in a dedicated infra repo (Terraform + Databricks TF provider). |
+| **DDL / table management as IaC** | Catalog, schema, and table definitions are bootstrapped via a setup notebook resp. via task parameters (INITIAL_SETUP), not managed declaratively. In production I would put this in a dedicated infra repo (Terraform + Databricks TF provider). |
 | **Access control & permissions** | No UC groups, roles, or permission grants are managed here. Row-level and column-level security, data masking, and attribute-based access control (ABAC) via tags are all out of scope. |
 | **Service principals** | CI/CD uses a PAT for simplicity. Managing service principals, their lifecycle, and secret rotation via IaC belongs in the infra layer. |
 | **Unity Catalog governance as code** | Ownership, tags, lineage policies, and audit log routing are platform-level concerns not covered here. |
