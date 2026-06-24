@@ -21,11 +21,11 @@ jobs:
       # Install uv (fast Python package manager)
       - uses: astral-sh/setup-uv@v5
 
-      # Install Python 3.11 — explicit so runner OS default can't change under us
+      # Install Python 3.12 — explicit so runner OS default can't change under us
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       # Install project dev dependencies (pytest, ruff, databricks-connect, etc.)
       - name: Install dependencies
@@ -42,10 +42,7 @@ jobs:
       - name: Bundle validate (dev target)
         run: databricks bundle validate --target dev
 
-      # Tests use Databricks Connect and require a live serverless session.
-      # Each PR run consumes serverless DBUs. Remove this step if that is
-      # not acceptable and rely on post-merge integration tests instead.
-      # TODO: unit tests — revisit once conftest.py is restructured to
-      # initialize Databricks Connect lazily (only when spark fixture is used).
-      # - name: Run tests
-      #   run: uv run pytest tests/ -m "not integration" -v
+      # Note: tests use Databricks Connect and require a live serverless session.
+      # Each PR run consumes serverless DBUs.
+      - name: Run tests
+        run: uv run pytest tests/ -v
