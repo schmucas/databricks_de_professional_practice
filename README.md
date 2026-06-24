@@ -32,15 +32,15 @@ It maps directly to the **Databricks Certified Data Engineer Professional** exam
 | Source data generation (setup notebook) | ✅ Done |
 | 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
 | 🔄 Incremental data generator | ✅ Done |
-| 🥈 Silver · PySpark | 🚧 In progress |
-| 🥇 Gold · PySpark | ⬜ Planned |
-| ✔️ Validation · PySpark path | ⬜ Planned |
+| 🥈 Silver · Classic PySpark | 🚧 In progress |
+| 🥇 Gold · Classic PySpark | ⬜ Planned |
+| ✔️ Validation · Classic PySpark path | ⬜ Planned |
 | 🥈 Silver · Lakeflow Declarative Pipelines | ⬜ Planned |
 | 🥇 Gold · Lakeflow Declarative Pipelines | ⬜ Planned |
 | ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
 | Data quality / expectations | ⬜ Planned |
-| 📊 Benchmark dashboard (DP vs PySpark) | ⬜ Planned |
+| 📊 Benchmark dashboard (DP vs Classic PySpark) | ⬜ Planned |
 | 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
 | 🏁 Final validation (end-to-end) | ⬜ Planned |
@@ -143,7 +143,7 @@ Nothing reaches production without passing the PR checks and the prod approval g
 
 ## Data pipeline: Bronze → Silver → Gold
 
-Data moves through three isolated layers, each with a clear responsibility. The transformation work from Silver to Gold is implemented **twice**, once with DLT and once with traditional PySpark, covering both paradigms in depth. Because the same logic runs both ways, the two tracks can be compared head-to-head: a **benchmark dashboard** surfaces cost, runtime, and performance side by side, making the trade-off between declarative and hand-tuned pipelines concrete.
+Data moves through three isolated layers, each with a clear responsibility. The transformation work from Silver to Gold is implemented **twice**, once with Declerative Pipelines and once with classic PySpark, covering both paradigms in depth. Because the same logic runs both ways, the two tracks can be compared head-to-head: a **benchmark dashboard** surfaces cost, runtime, and performance side by side, making the trade-off between declarative and hand-tuned pipelines concrete.
 
 ```mermaid
 flowchart LR
