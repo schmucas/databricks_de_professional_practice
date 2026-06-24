@@ -32,15 +32,18 @@ It maps directly to the **Databricks Certified Data Engineer Professional** exam
 | Source data generation (setup notebook) | ✅ Done |
 | 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
 | 🔄 Incremental data generator | ✅ Done |
-| 🥈 Silver · Lakeflow Declarative Pipelines | ⬜ Planned |
 | 🥈 Silver · PySpark | 🚧 In progress |
-| 🥇 Gold · Lakeflow Declarative Pipelines | ⬜ Planned |
 | 🥇 Gold · PySpark | ⬜ Planned |
+| ✔️ Validation · PySpark path | ⬜ Planned |
+| 🥈 Silver · Lakeflow Declarative Pipelines | ⬜ Planned |
+| 🥇 Gold · Lakeflow Declarative Pipelines | ⬜ Planned |
+| ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
 | Data quality / expectations | ⬜ Planned |
 | 📊 Benchmark dashboard (DLT vs PySpark) | ⬜ Planned |
 | 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
+| 🏁 Final validation (end-to-end) | ⬜ Planned |
 
 ---
 
