@@ -8,7 +8,7 @@
 ![pytest](https://img.shields.io/badge/tests-planned-9aa3ad?logo=pytest&logoColor=white)
 ![uv](https://img.shields.io/badge/packaging-uv-DE5FE9)
 ![status](https://img.shields.io/badge/status-work%20in%20progress-F5A623)
-![progress](https://img.shields.io/badge/progress-~25%25-F5A623)
+![progress](https://img.shields.io/badge/progress-~30%25-F5A623)
 
 > A production-grade data engineering project built on Databricks: fully automated, version-controlled, and running on the free tier.
 
@@ -20,9 +20,9 @@ It maps directly to the **Databricks Certified Data Engineer Professional** exam
 
 > 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The transformation layers, performance optimization, quality management, and benchmark dashboard are next.
 
-## Project status: ~25%
+## Project status: ~30%
 
-`██████░░░░░░░░░░░░░░░░░░░░` **~25% complete**
+`███████░░░░░░░░░░░░░░░░░░░` **~30% complete**
 
 | Component | Status |
 |---|---|
@@ -31,12 +31,13 @@ It maps directly to the **Databricks Certified Data Engineer Professional** exam
 | Environment separation (catalogs + bundle targets) | ✅ Done |
 | Source data generation (setup notebook) | ✅ Done |
 | 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
-| 🔄 Incremental data generator | 🚧 In progress |
+| 🔄 Incremental data generator | ✅ Done |
 | 🥈 Silver (Lakeflow Declarative Pipelines + PySpark) | ⬜ Planned |
 | 🥇 Gold (both tracks) | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
 | Data quality / expectations | ⬜ Planned |
 | 📊 Benchmark dashboard (DLT vs PySpark) | ⬜ Planned |
+| 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
 
 ---
