@@ -20,6 +20,9 @@ dev = [
     "ipykernel",
 ]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.ruff]
 line-length = 120
 builtins = ["spark", "dbutils", "display", "sc", "table"]
