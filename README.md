@@ -75,7 +75,7 @@ flowchart LR
     subgraph gh["📦 GitHub"]
         direction TB
         PR(["Pull request"])
-        CHECK{{"PR checks<br/>ruff + bundle validate"}}
+        CHECK{{"PR checks<br/>🧪 unit tests · ruff · validate"}}
         MAIN(["main branch"])
         RC[/"Pre-release tag<br/>v*-rc*"/]
         REL[/"Release tag<br/>v*"/]
@@ -137,7 +137,7 @@ The Git ↔ Databricks integration follows **Databricks' recommended per-environ
 - **Dev runs in development mode, and deploys are automated.** The `dev` target uses `mode: development`, so every deploy is an isolated copy with resources prefixed `[dev <user>]` and schedules paused. CI/CD auto-deploys `dev` on every merge to `main` (via the service principal), and developers can also deploy their own copy locally with `databricks bundle deploy -t dev`. Either way it lands under the deploying user's workspace, so nobody collides and no manual step is needed.
 - **Stage and prod run in production mode on shared paths.** They are deployed only by CI/CD via a service principal (PAT-based on Free Edition) to fixed shared paths (`/Workspace/Shared/<target>/…`), never from a personal account, and only on tags. Promotion is gated: a pre-release tag (`v*-rc*`) deploys to stage (integration tests planned); a release tag (`v*`) deploys to prod behind a GitHub Environment approval gate.
 
-Nothing reaches production without passing the PR checks and the prod approval gate. Automated unit and integration tests are planned (see the status table above).
+Nothing reaches production without passing the PR checks and the prod approval gate. Automated unit and integration tests are in progress/planned (see the status table above).
 
 ---
 
