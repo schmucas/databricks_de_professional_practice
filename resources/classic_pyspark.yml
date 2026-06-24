@@ -1,0 +1,16 @@
+# the environment setup job for databricks_de_professional_practice.
+
+resources:
+  jobs:
+    classic_pyspark_silver_gold:
+      name: classic_pyspark_silver_gold
+      
+      parameters:
+        - name: env
+          default: ${var.env}
+
+      tasks:
+        - task_key: silver_shipment_events
+          notebook_task:
+            notebook_path: ../src/classic_approach/silver/batch/silver_shipment_events.ipynb
+            
