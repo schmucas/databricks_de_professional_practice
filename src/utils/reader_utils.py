@@ -22,12 +22,12 @@ def read_delta_table(table_conf: dict, start_date: str, end_date: str) -> DataFr
     ts_col = table_conf.get("timestamp_col")
     order_col = table_conf.get("order_col")
 
-    df = spark.read.table(f"{schema}.{table}").filter(F.col(ts_col).between(start_date, end_date))
+    df = spark.read.table(f"{schema}.{table}").filter(F.col(ts_col).between(start_date, end_date))  # type: ignore[name-defined]
     
-    if "dedupe_desc" in SOURCE_TABLE_CONF:
+    if "dedupe_desc" in table_conf:
         return df.transform(dedupe, table_conf.get("dedupe_desc"), order_col)
     
-    if "dedupe_asc" in SOURCE_TABLE_CONF:
+    if "dedupe_asc" in table_conf:
         return df.transform(dedupe, table_conf.get("dedupe_asc"), order_col, False)
     
     return df
