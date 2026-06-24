@@ -40,7 +40,7 @@ It maps directly to the **Databricks Certified Data Engineer Professional** exam
 | ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
 | Data quality / expectations | ⬜ Planned |
-| 📊 Benchmark dashboard (DLT vs PySpark) | ⬜ Planned |
+| 📊 Benchmark dashboard (DP vs PySpark) | ⬜ Planned |
 | 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
 | 🏁 Final validation (end-to-end) | ⬜ Planned |
@@ -239,7 +239,7 @@ So every DLT and PySpark run is exercised against genuinely changing, imperfect 
 
 ## Environment separation
 
-Environments are separated **at the catalog level**, within a single workspace. Free Edition provides only one workspace (one metastore, no account console), so the isolation boundary here is the Unity Catalog, not separate workspaces or metastores. Each environment gets its own catalog, prefixed **`sl_`** (for **S**wiss**L**ogistics): `sl_dev`, `sl_stage`, and `sl_prod`, with a shared `sl_ingest` source catalog. Data lives in separate catalogs and the bundle deploys each target's assets independently, but compute, the metastore, and the workspace itself are shared. In a paid setup you'd push this further, to separate workspaces (and ideally separate metastores) per environment, but that's beyond what Free Edition allows.
+Environments are separated **at the catalog level**, within a single workspace. Free Edition provides only one workspace (one metastore, no account console), so the isolation boundary here is the Unity Catalog, not separate workspaces or metastores. Each environment gets its own catalog, prefixed **`sl_`** (for **S**wiss**L**ogistics): `sl_dev`, `sl_stage`, and `sl_prod`, with a shared `sl_ingest` source catalog. Data lives in separate catalogs and the bundle deploys each target's assets independently, but compute, the metastore, and the workspace itself are shared. In a paid setup I'd push this further, to separate workspaces (depending on used-case with catalog-binding) per environment, but that's beyond what Free Edition allows.
 
 ```mermaid
 flowchart TB
@@ -340,7 +340,7 @@ The following are real production concerns but are deliberately not part of this
 
 | Area | Notes |
 |---|---|
-| **DDL / table management as IaC** | Catalog, schema, and table definitions are bootstrapped via a setup notebook, not managed declaratively. In production this would live in a dedicated infra repo (Terraform + Databricks TF provider). |
+| **DDL / table management as IaC** | Catalog, schema, and table definitions are bootstrapped via a setup notebook resp. via job parameters (INITIAL_SETUP), not managed declaratively. In production I would put this in a dedicated infra repo (Terraform + Databricks TF provider). |
 | **Access control & permissions** | No UC groups, roles, or permission grants are managed here. Row-level and column-level security, data masking, and attribute-based access control (ABAC) via tags are all out of scope. |
 | **Service principals** | CI/CD uses a PAT for simplicity. Managing service principals, their lifecycle, and secret rotation via IaC belongs in the infra layer. |
 | **Unity Catalog governance as code** | Ownership, tags, lineage policies, and audit log routing are platform-level concerns not covered here. |
