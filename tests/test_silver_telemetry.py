@@ -44,8 +44,6 @@ def test_normalize_vehicle_telemetry(spark):
     assertDataFrameEqual(result, expected)
 
 
-from pyspark.testing import assertDataFrameEqual
-
 def test_enrich_vehicle_telemetry(spark):
     data = [
         # cold chain cargo, speed under limit, engine normal
