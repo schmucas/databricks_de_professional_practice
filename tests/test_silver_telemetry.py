@@ -1,4 +1,5 @@
 from pyspark.sql import functions as F
+from pyspark.sql.types import *
 from pyspark.testing import assertDataFrameEqual
 from src.classic_approach.silver.batch.silver_vehicle_telemetry_transforms import normalize_vehicle_telemetry, enrich_vehicle_telemetry
 
