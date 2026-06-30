@@ -28,7 +28,7 @@ audit table (see below).
 
 | Source | Location | Format | Notes |
 |---|---|---|---|
-| `customers` | `sl_ingest.{env}.customers` | Delta, CDF on | Versioned SCD2 source, one `is_current=true` row per customer |
+| `customers` | `sl_ingest.{env}.customers` | Delta, CDF on | Current-state source (simulates Postgres), one row per customer; CDC feeds the warehouse SCD2 build |
 | `orders` | `sl_ingest.{env}.orders` | Delta, CDF on | Order lifecycle, ~2-3% data-quality issues |
 | `shipment_events` | `/Volumes/sl_ingest/{env}/landing/shipment_events` | JSON files | High volume, dupes / late / bad records |
 | `telemetry` | `/Volumes/sl_ingest/{env}/landing/telemetry` | JSON files | Skewed 60% to 5 vehicles |
@@ -40,20 +40,20 @@ The Delta sources (`customers`, `orders`) have Change Data Feed enabled, so the
 bronze loaders read incremental changes via `readChangeFeed`. The JSON sources land
 new files each run for Auto Loader to pick up.
 
-**Customers (SCD2).** Each incremental batch uses the live current customers as the
-reference and produces genuine changes, not random near-duplicates:
+**Customers (simulated Postgres, SCD2 source).** `sl_ingest.customers` stands in for
+an operational **Postgres** customers table: current state only, one row per customer,
+no SCD2 columns. Each batch mutates it the way an application would, and CDF turns
+those mutations into the change events the warehouse uses to build a Type 2 dimension:
 
-- **Attribute updates**: a subset get a new tier and address/city. The new version is
-  appended (`is_current=true`, `changed_at=null`) and the prior current row is
-  retired (`is_current=false`, `changed_at=<batch ts>`).
-- **Churn (soft-delete)**: a few current rows are retired with no replacement, so no
-  current version remains. Soft-delete is signalled purely via `is_current`.
-- **New customers**: brand-new ids continue the sequence.
+- **Update**: a subset of existing customers change tier and address/city in place
+  (`last_updated` set to the batch time). CDF emits `update_preimage` / `update_postimage`.
+- **Delete**: a few customers churn and are removed. CDF emits `delete`.
+- **Insert**: brand-new customers continue the id sequence. CDF emits `insert`.
 - **Unchanged**: everyone not picked is left alone, so silver has to ignore no-ops.
 
-The retirements are real Delta `UPDATE`s, so the source CDF emits
-`update_preimage` / `update_postimage` for the flips and `insert` for the appended
-rows. The SCD2 invariant (exactly one current row per customer) always holds.
+The SCD2 history (`valid_from` / `valid_to` / `is_current`) is **not** stored in the
+source. Silver reconstructs it from the bronze CDF log using `_change_type` and commit
+order, the standard CDC-to-SCD2 pattern.
 
 ## Controls (job parameters)
 
