@@ -16,4 +16,7 @@ resources:
         - task_key: silver_vehicle_telemetry
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_vehicle_telemetry.ipynb
+        - task_key: silver_dim_customers
+          notebook_task:
+            notebook_path: ../src/classic_approach/silver/stream/silver_dim_customers.ipynb
             
