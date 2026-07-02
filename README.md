@@ -18,34 +18,7 @@ This project covers the **data engineering layer** end-to-end, from ingestion th
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
 
-> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The transformation layers, performance optimization, quality management, and benchmark dashboard are next.
-
-## Project status: ~30%
-
-`███████░░░░░░░░░░░░░░░░░░░` **~30% complete**
-
-| Component | Status |
-|---|---|
-| Repo structure & Databricks Asset Bundles | ✅ Done |
-| Git integration & CI/CD (PR checks → dev → stage → prod) | ✅ Done |
-| Environment separation (catalogs + bundle targets) | ✅ Done |
-| Source data generation (setup notebook) | ✅ Done |
-| 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
-| 🔄 Incremental data generator | ✅ Done |
-| 🥈 Silver · Classic PySpark | 🚧 In progress |
-| 🥇 Gold · Classic PySpark | ⬜ Planned |
-| ✔️ Validation · Classic PySpark path | ⬜ Planned |
-| 🥈 Silver · Lakeflow Declarative Pipelines | ⬜ Planned |
-| 🥇 Gold · Lakeflow Declarative Pipelines | ⬜ Planned |
-| ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
-| Performance Optimization | ⬜ Planned |
-| Data quality / expectations | ⬜ Planned |
-| 📊 Benchmark dashboard (DP vs Classic PySpark) | ⬜ Planned |
-| 🧪 Unit tests (pytest) | 🚧 In progress |
-| Integration tests | ⬜ Planned |
-| 🏁 Final validation (end-to-end) | ⬜ Planned |
-
----
+> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The transformation layers, performance optimization, quality management, and benchmark dashboard are next. See [**Project status**](#project-status-30) below for the full breakdown.
 
 ## The data: SwissLogistics AG
 
@@ -314,6 +287,33 @@ gitGraph
 | Merge to `main` | Auto-deploy to **dev** (development mode, via service principal) |
 | Pre-release tag `v*-rc*` | Deploy to shared **stage** (integration tests planned) |
 | Release tag `v*` | Gated deploy to **prod** (human approval required) |
+
+---
+
+## Project status: ~30%
+
+`███████░░░░░░░░░░░░░░░░░░░` **~30% complete**
+
+| Component | Status |
+|---|---|
+| Repo structure & Databricks Asset Bundles | ✅ Done |
+| Git integration & CI/CD (PR checks → dev → stage → prod) | ✅ Done |
+| Environment separation (catalogs + bundle targets) | ✅ Done |
+| Source data generation (setup notebook) | ✅ Done |
+| 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
+| 🔄 Incremental data generator | ✅ Done |
+| 🥈 Silver · Classic PySpark | 🚧 In progress |
+| 🥇 Gold · Classic PySpark | ⬜ Planned |
+| ✔️ Validation · Classic PySpark path | ⬜ Planned |
+| 🥈 Silver · Lakeflow Declarative Pipelines | ⬜ Planned |
+| 🥇 Gold · Lakeflow Declarative Pipelines | ⬜ Planned |
+| ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
+| Performance Optimization | ⬜ Planned |
+| Data quality / expectations | ⬜ Planned |
+| 📊 Benchmark dashboard (DP vs Classic PySpark) | ⬜ Planned |
+| 🧪 Unit tests (pytest) | 🚧 In progress |
+| Integration tests | ⬜ Planned |
+| 🏁 Final validation (end-to-end) | ⬜ Planned |
 
 ---
 
