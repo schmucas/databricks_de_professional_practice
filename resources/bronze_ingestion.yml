@@ -21,17 +21,11 @@ resources:
           notebook_task:
             notebook_path: ../src/ingestion/from_delta/customers.ipynb
         
-        - task_key: from_delta_orders
+        - task_key: from_json_orders
           depends_on:
             - task_key: wait_for_source_load
           notebook_task:
-            notebook_path: ../src/ingestion/from_delta/orders.ipynb
-        
-        - task_key: from_json_orders_cdc
-          depends_on:
-            - task_key: wait_for_source_load
-          notebook_task:
-            notebook_path: ../src/ingestion/from_json/orders_cdc.ipynb
+            notebook_path: ../src/ingestion/from_json/orders.ipynb
         
         - task_key: from_json_shipment_events
           depends_on:
