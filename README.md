@@ -167,7 +167,7 @@ flowchart LR
 
 ## Keeping the data messy: the incremental generator
 
-The initial seed is static, but real pipelines face a moving target. A second notebook, `incremental_data_generator.ipynb`, runs **before each pipeline execution** and advances the dataset: it appends a new batch to the `sl_ingest` sources and can inject realistic mess. Two controls keep this deliberate. **Probabilistic anomalies** (bad records, duplicates, late data) are toggled per dataset and hit a small random share of rows. **Schema drift** is an explicit per-table choice (`DRIFT_THIS_RUN`) that adds one new column at a time, deterministically. Every run is logged to a `_generator_runs` tracking table that doubles as **persistent state**: once a column drifts in, the table records it so the next run keeps emitting it, exactly like a real upstream change.
+The initial seed is static, but real pipelines face a moving target. A second notebook, `incremental_data_generator.ipynb`, runs **before each pipeline execution** and advances the dataset: it appends a new batch to the `sl_ingest` sources and can inject realistic mess. Two controls keep this deliberate. **Probabilistic anomalies** (bad records, duplicates, late data) are toggled per dataset and hit a small random share of rows. **Schema drift** is an explicit per-table choice (`DRIFT_THIS_RUN` via job parameters) that adds one new column at a time, deterministically. Every run is logged to a `_generator_runs` tracking table that doubles as **persistent state**: once a column drifts in, the table records it so the next run keeps emitting it, exactly like a real upstream change.
 
 Wired as a shared seed step, it runs once and both tracks consume the fresh batch:
 
@@ -304,6 +304,7 @@ gitGraph
 | Data quality / expectations | ⬜ Planned |
 | 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
+| Dashboards | ⬜ Planned |
 | 🏁 Final validation (end-to-end) | ⬜ Planned |
 
 ---
@@ -359,13 +360,11 @@ Several of these (Lakebase, Lakehouse Federation, parts of Delta Sharing) may al
 
 ## Key design decisions
 
-**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. DLT manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines. Understanding both paradigms, and both modeling styles, is the real skill.
-
-**Notebooks for ingestion, DLT for transformation.** Bronze ingestion runs as notebook tasks in a job: simple, independently schedulable, and easy to debug. DLT takes over at Silver where its Auto CDC, quality expectations, and lineage tracking add the most value.
+**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. DLT manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines.
 
 **No DBFS, no mounts.** All storage is Unity Catalog tables and Volumes. Fine-grained access control, full lineage, no legacy path hacks.
 
-**Free Edition only.** The entire project runs within the Databricks Free Edition (2025 serverless + Unity Catalog tier). Where the free tier imposes real constraints (for example, no OAuth machine-to-machine authentication for CI/CD), the project documents the limitation and uses the correct workaround (PAT-based auth in GitHub Actions secrets).
+**Free Edition only.** The entire project runs within the Databricks Free Edition (2025 serverless + Unity Catalog tier). Where the free tier imposes real constraints, the project documents the limitation and uses the correct workaround (eg. PAT-based auth in GitHub Actions secrets).
 
 ---
 
