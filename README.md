@@ -206,7 +206,7 @@ So every DLT and PySpark run is exercised against genuinely changing, imperfect 
 
 ## Environment separation
 
-Environments are separated **at the catalog level**, within a single workspace. Free Edition provides only one workspace (one metastore, no account console), so the isolation boundary here is the Unity Catalog, not separate workspaces or metastores. Each environment gets its own catalog, prefixed **`sl_`** (for **S**wiss**L**ogistics): `sl_dev`, `sl_stage`, and `sl_prod`, with a shared `sl_ingest` source catalog. Data lives in separate catalogs and the bundle deploys each target's assets independently, but compute, the metastore, and the workspace itself are shared. In a paid setup I'd push this further, to separate workspaces (depending on used-case with catalog-binding) per environment, but that's beyond what Free Edition allows.
+Environments are separated **at the catalog level**, within a single workspace. Free Edition provides only one workspace (one metastore, no account console), so the isolation boundary here is the catalog, not separate workspaces or metastores. Each environment gets its own catalog, prefixed **`sl_`** (for **S**wiss**L**ogistics): `sl_dev`, `sl_stage`, and `sl_prod`, with a shared `sl_ingest` source catalog. Data lives in separate catalogs and the bundle deploys each target's assets independently, but compute, the metastore, and the workspace itself are shared. In a paid setup I'd push this further, to separate workspaces (depending on used-case with catalog-binding) per environment, but that's beyond what Free Edition allows.
 
 ```mermaid
 flowchart TB
