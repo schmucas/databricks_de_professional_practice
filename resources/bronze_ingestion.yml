@@ -38,4 +38,10 @@ resources:
             - task_key: wait_for_source_load
           notebook_task:
             notebook_path: ../src/ingestion/from_json/telemetry.ipynb
+
+        - task_key: from_json_vehicles
+          depends_on:
+            - task_key: wait_for_source_load
+          notebook_task:
+            notebook_path: ../src/ingestion/from_json/vehicles.ipynb
             
