@@ -11,37 +11,37 @@ resources:
           default: ${var.env}
 
       tasks:
-        - task_key: wait_for_source_load
+        - task_key: wait_for_incremental_source_load
           run_job_task:
             job_id: ${resources.jobs.load_new_source_data.id}
 
         - task_key: from_delta_customers
           depends_on:
-            - task_key: wait_for_source_load
+            - task_key: wait_for_incremental_source_load
           notebook_task:
             notebook_path: ../src/ingestion/from_delta/customers.ipynb
         
         - task_key: from_json_orders
           depends_on:
-            - task_key: wait_for_source_load
+            - task_key: wait_for_incremental_source_load
           notebook_task:
             notebook_path: ../src/ingestion/from_json/orders.ipynb
         
         - task_key: from_json_shipment_events
           depends_on:
-            - task_key: wait_for_source_load
+            - task_key: wait_for_incremental_source_load
           notebook_task:
             notebook_path: ../src/ingestion/from_json/shipment_events.ipynb
         
         - task_key: from_json_telemetry
           depends_on:
-            - task_key: wait_for_source_load
+            - task_key: wait_for_incremental_source_load
           notebook_task:
             notebook_path: ../src/ingestion/from_json/telemetry.ipynb
 
         - task_key: from_json_vehicles
           depends_on:
-            - task_key: wait_for_source_load
+            - task_key: wait_for_incremental_source_load
           notebook_task:
             notebook_path: ../src/ingestion/from_json/vehicles.ipynb
             
