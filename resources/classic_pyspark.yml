@@ -10,6 +10,9 @@ resources:
           default: ${var.env}
 
       tasks:
+        - task_key: silver_vehicles
+          notebook_task:
+            notebook_path: ../src/classic_approach/silver/batch/silver_scd1_vehicles.ipynb
         - task_key: silver_shipment_events
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_shipment_events.ipynb
@@ -19,7 +22,6 @@ resources:
         - task_key: silver_customers
           notebook_task:
             notebook_path: ../src/classic_approach/silver/stream/silver_scd2_customers.ipynb
-        - task_key: silver_vehicles
+        - task_key: silver_orders
           notebook_task:
-            notebook_path: ../src/classic_approach/silver/batch/silver_scd1_vehicles.ipynb
-            
+            notebook_path: ../src/classic_approach/silver/stream/silver_scd2_orders.ipynb
