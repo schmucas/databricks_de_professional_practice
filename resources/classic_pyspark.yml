@@ -10,6 +10,7 @@ resources:
           default: ${var.env}
 
       tasks:
+      # silver layer
         - task_key: silver_vehicles
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_scd1_vehicles.ipynb
@@ -25,3 +26,10 @@ resources:
         - task_key: silver_orders
           notebook_task:
             notebook_path: ../src/classic_approach/silver/stream/silver_scd2_orders.ipynb
+            
+      # gold layer
+        - task_key: gold_dim_customers
+          depends_on:
+            - task_key: silver_customers
+          notebook_task:
+            notebook_path: ../src/classic_approach/gold/gold_dim_customer.ipynb
