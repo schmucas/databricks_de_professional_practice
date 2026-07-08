@@ -171,110 +171,32 @@ Both tracks converge on the same **Kimball dimensional model**. It is really a *
 Grain, one line per fact: `fact_order_fulfillment` = one order; `fact_shipment_event` = one tracking event; `fact_vehicle_telemetry` = one vehicle per time window. Gold facts are shown in **gold**, dimensions in **blue**.
 
 ```mermaid
-erDiagram
-    dim_customer ||--o{ fact_order_fulfillment : "bill-to"
-    dim_location ||--o{ fact_order_fulfillment : "origin / destination"
-    dim_date     ||--o{ fact_order_fulfillment : "order / delivery date"
-    dim_date     ||--o{ fact_shipment_event : "event date"
-    dim_vehicle  ||--o{ fact_shipment_event : "carried by"
-    dim_date     ||--o{ fact_vehicle_telemetry : "period date"
-    dim_vehicle  ||--o{ fact_vehicle_telemetry : "measured on"
-    fact_order_fulfillment ||--o{ fact_shipment_event : "order_id (degenerate)"
+flowchart LR
+    DCUST["<b>dim_customer</b> · SCD2<br/>PK customer_sk<br/>customer_id · company_name<br/>tier · industry · contact_email<br/>address · city · postal_code<br/>start_at · end_at · is_current"]
+    DDATE["<b>dim_date</b> · conformed<br/>PK date_key<br/>full_date · year · quarter · month<br/>month_name · iso_week<br/>day_of_week · day_name<br/>is_weekend · is_holiday_ch"]
+    DLOC["<b>dim_location</b><br/>PK location_sk<br/>city · canton · region"]
+    DVEH["<b>dim_vehicle</b> · SCD1<br/>PK vehicle_sk<br/>vehicle_id · plate_number · model<br/>vehicle_type · capacity_kg<br/>cold_chain_capable · home_depot<br/>commissioned_date"]
 
-    dim_customer:::dim {
-        bigint customer_sk PK
-        int customer_id
-        varchar company_name
-        varchar contact_email
-        varchar address
-        varchar city
-        varchar postal_code
-        varchar tier
-        varchar industry
-        timestamp start_at
-        timestamp end_at
-        boolean is_current
-    }
-    dim_date:::dim {
-        int date_key PK
-        date full_date
-        int year
-        int quarter
-        int month
-        varchar month_name
-        int iso_week
-        int day_of_week
-        varchar day_name
-        boolean is_weekend
-        boolean is_holiday_ch
-    }
-    dim_location:::dim {
-        bigint location_sk PK
-        varchar city
-        varchar canton
-        varchar region
-    }
-    dim_vehicle:::dim {
-        bigint vehicle_sk PK
-        varchar vehicle_id
-        varchar plate_number
-        varchar model
-        varchar vehicle_type
-        int capacity_kg
-        boolean cold_chain_capable
-        varchar home_depot
-        date commissioned_date
-    }
-    fact_order_fulfillment:::fact {
-        varchar order_id PK
-        bigint customer_sk FK
-        bigint origin_location_sk FK
-        bigint destination_location_sk FK
-        int order_date_key FK
-        int delivery_date_key FK
-        varchar product_code
-        varchar product_name
-        int quantity
-        decimal total_amount
-        varchar payment_method
-        varchar current_status
-        timestamp confirmed_ts
-        timestamp picked_up_ts
-        timestamp in_transit_ts
-        timestamp out_for_delivery_ts
-        timestamp delivered_ts
-        decimal delivery_days
-        boolean is_on_time
-    }
-    fact_shipment_event:::fact {
-        varchar event_id PK
-        timestamp event_ts
-        int event_date_key FK
-        bigint vehicle_sk FK
-        varchar order_id FK
-        varchar event_type
-        decimal latitude
-        decimal longitude
-        decimal temperature_c
-        int delay_minutes
-    }
-    fact_vehicle_telemetry:::fact {
-        bigint vehicle_sk PK,FK
-        timestamp period_start PK
-        int period_date_key FK
-        int readings_count
-        decimal avg_speed_kmh
-        decimal max_speed_kmh
-        decimal km_driven
-        decimal fuel_used_pct
-        decimal avg_engine_temp_c
-        decimal min_cargo_temp_c
-        decimal max_cargo_temp_c
-        decimal utilization_pct
-    }
+    FOF["<b>fact_order_fulfillment</b><br/><i>grain: one order</i><br/>PK order_id<br/>FK customer_sk<br/>FK origin_location_sk · FK destination_location_sk<br/>FK order_date_key · FK delivery_date_key<br/>quantity · total_amount · payment_method<br/>current_status · confirmed_ts … delivered_ts<br/>delivery_days · is_on_time"]
+    FSE["<b>fact_shipment_event</b><br/><i>grain: one tracking event</i><br/>PK event_id<br/>FK event_date_key · FK vehicle_sk<br/>order_id (degenerate)<br/>event_ts · event_type<br/>latitude · longitude<br/>temperature_c · delay_minutes"]
+    FVT["<b>fact_vehicle_telemetry</b><br/><i>grain: vehicle × time window</i><br/>PK vehicle_sk · PK period_start<br/>FK period_date_key<br/>readings_count · km_driven<br/>avg_speed_kmh · max_speed_kmh<br/>fuel_used_pct · utilization_pct<br/>avg_engine_temp_c<br/>min_cargo_temp_c · max_cargo_temp_c"]
+
+    DCUST -->|customer_sk| FOF
+    DLOC -->|origin / destination| FOF
+    DDATE -->|order / delivery| FOF
+    DDATE -->|event date| FSE
+    DVEH -->|vehicle_sk| FSE
+    DDATE -->|period date| FVT
+    DVEH -->|vehicle_sk| FVT
+    FOF -.->|order_id| FSE
 
     classDef fact fill:#d4af37,stroke:#9a7d1a,stroke-width:2px,color:#2a2200
     classDef dim  fill:#4a90d9,stroke:#2c5f8a,stroke-width:1.5px,color:#ffffff
+
+    class FOF,FSE,FVT fact
+    class DCUST,DDATE,DLOC,DVEH dim
+
+    linkStyle default stroke-width:1.5px
 ```
 
 > Interactive version (with full column types): [SwissLogistics Gold Star Schema on dbdiagram.io](https://dbdiagram.io/d/SwissLogistics-Gold-Star-Schema-6a4aab974ac62e474c32f352).
