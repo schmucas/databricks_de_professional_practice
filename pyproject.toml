@@ -28,4 +28,6 @@ line-length = 120
 builtins = ["spark", "dbutils", "display", "sc", "table"]
 
 [tool.ruff.lint]
-ignore = ["F403", "F405"]
+# E712: PySpark Column comparisons (F.col(...) == False/True) are not Python bool
+# comparisons; Ruff's "not F.col(...)" fix is invalid on Spark Column objects.
+ignore = ["F403", "F405", "E712"]

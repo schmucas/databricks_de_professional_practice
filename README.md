@@ -8,7 +8,7 @@
 ![pytest](https://img.shields.io/badge/tests-planned-9aa3ad?logo=pytest&logoColor=white)
 ![uv](https://img.shields.io/badge/packaging-uv-DE5FE9)
 ![status](https://img.shields.io/badge/status-work%20in%20progress-F5A623)
-![progress](https://img.shields.io/badge/progress-~30%25-F5A623)
+![progress](https://img.shields.io/badge/progress-40%25-F5A623)
 
 > A production-grade data engineering project built on Databricks: fully automated, version-controlled, and running on the free tier.
 
@@ -18,7 +18,7 @@ This project covers the **data engineering layer** end-to-end, from ingestion th
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
 
-> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-30) below for the full breakdown.
+> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-40) below for the full breakdown.
 
 ## The data: SwissLogistics AG
 
@@ -164,6 +164,121 @@ flowchart LR
     style psp_track fill:#fdf3e3,stroke:#e8a838,stroke-width:2px
 ```
 
+### Gold layer: the star schema data mart
+
+Both tracks converge on the same **Kimball dimensional model**. It is really a **fact constellation** (multiple fact tables sharing conformed dimensions), not a single star: `dim_date` is conformed across all three facts and `dim_vehicle` is shared by shipment events and telemetry. `dim_customer` is historized as **SCD Type 2** (`start_at` / `end_at` / `is_current`), `dim_vehicle` as **SCD Type 1**, and `order_id` travels on `fact_shipment_event` as a **degenerate dimension** linking events back to the order grain.
+
+Grain, one line per fact: `fact_order_fulfillment` = one order; `fact_shipment_event` = one tracking event; `fact_vehicle_telemetry` = one vehicle per time window. Gold facts are shown in **gold**, dimensions in **blue**.
+
+```mermaid
+erDiagram
+    dim_customer ||--o{ fact_order_fulfillment : "bill-to"
+    dim_location ||--o{ fact_order_fulfillment : "origin / destination"
+    dim_date     ||--o{ fact_order_fulfillment : "order / delivery date"
+    dim_date     ||--o{ fact_shipment_event : "event date"
+    dim_vehicle  ||--o{ fact_shipment_event : "carried by"
+    dim_date     ||--o{ fact_vehicle_telemetry : "period date"
+    dim_vehicle  ||--o{ fact_vehicle_telemetry : "measured on"
+    fact_order_fulfillment ||--o{ fact_shipment_event : "order_id (degenerate)"
+
+    dim_customer:::dim {
+        bigint customer_sk PK
+        int customer_id
+        varchar company_name
+        varchar contact_email
+        varchar address
+        varchar city
+        varchar postal_code
+        varchar tier
+        varchar industry
+        timestamp start_at
+        timestamp end_at
+        boolean is_current
+    }
+    dim_date:::dim {
+        int date_key PK
+        date full_date
+        int year
+        int quarter
+        int month
+        varchar month_name
+        int iso_week
+        int day_of_week
+        varchar day_name
+        boolean is_weekend
+        boolean is_holiday_ch
+    }
+    dim_location:::dim {
+        bigint location_sk PK
+        varchar city
+        varchar canton
+        varchar region
+    }
+    dim_vehicle:::dim {
+        bigint vehicle_sk PK
+        varchar vehicle_id
+        varchar plate_number
+        varchar model
+        varchar vehicle_type
+        int capacity_kg
+        boolean cold_chain_capable
+        varchar home_depot
+        date commissioned_date
+    }
+    fact_order_fulfillment:::fact {
+        varchar order_id PK
+        bigint customer_sk FK
+        bigint origin_location_sk FK
+        bigint destination_location_sk FK
+        int order_date_key FK
+        int delivery_date_key FK
+        varchar product_code
+        varchar product_name
+        int quantity
+        decimal total_amount
+        varchar payment_method
+        varchar current_status
+        timestamp confirmed_ts
+        timestamp picked_up_ts
+        timestamp in_transit_ts
+        timestamp out_for_delivery_ts
+        timestamp delivered_ts
+        decimal delivery_days
+        boolean is_on_time
+    }
+    fact_shipment_event:::fact {
+        varchar event_id PK
+        timestamp event_ts
+        int event_date_key FK
+        bigint vehicle_sk FK
+        varchar order_id FK
+        varchar event_type
+        decimal latitude
+        decimal longitude
+        decimal temperature_c
+        int delay_minutes
+    }
+    fact_vehicle_telemetry:::fact {
+        bigint vehicle_sk PK,FK
+        timestamp period_start PK
+        int period_date_key FK
+        int readings_count
+        decimal avg_speed_kmh
+        decimal max_speed_kmh
+        decimal km_driven
+        decimal fuel_used_pct
+        decimal avg_engine_temp_c
+        decimal min_cargo_temp_c
+        decimal max_cargo_temp_c
+        decimal utilization_pct
+    }
+
+    classDef fact fill:#d4af37,stroke:#9a7d1a,stroke-width:2px,color:#2a2200
+    classDef dim  fill:#4a90d9,stroke:#2c5f8a,stroke-width:1.5px,color:#ffffff
+```
+
+> Interactive version (with full column types): [SwissLogistics Gold Star Schema on dbdiagram.io](https://dbdiagram.io/d/SwissLogistics-Gold-Star-Schema-6a4aab974ac62e474c32f352).
+
 ---
 
 ## Keeping the data messy: the incremental generator
@@ -282,9 +397,9 @@ gitGraph
 
 ---
 
-## Project status: ~30%
+## Project status: 40%
 
-`███████░░░░░░░░░░░░░░░░░░░` **~30% complete**
+`██████████░░░░░░░░░░░░░░░` **40% complete**
 
 | Component | Status |
 |---|---|
@@ -295,11 +410,11 @@ gitGraph
 | 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
 | 🔄 Incremental data generator | ✅ Done |
 | 🗺️ Data modeling blueprint (bus matrix → star + vault design) | 🚧 In progress |
-| 🥈 Silver · Classic PySpark (conformed entities, SCD2) | 🚧 In progress |
-| 🥇 Gold · Classic PySpark (star schema) | ⬜ Planned |
-| ✔️ Validation · Classic PySpark path | ⬜ Planned |
+| 🥈 Silver · Classic PySpark (conformed entities, SCD2) | ✅ Done |
+| 🥇 Gold · Classic PySpark (star schema) | 🚧 In progress |
+| ✔️ Validation · Classic PySpark path | 🚧 In progress |
 | 🥈 Silver · Lakeflow Declarative Pipelines (Data Vault) | ⬜ Planned |
-| 🥇 Gold · Lakeflow Declarative Pipelines (star schema via Auto CDC) | ⬜ Planned |
+| 🥇 Gold · Lakeflow Declarative Pipelines (star schema) | ⬜ Planned |
 | ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
 | Data quality / expectations | ⬜ Planned |
