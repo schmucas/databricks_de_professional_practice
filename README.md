@@ -164,9 +164,9 @@ flowchart LR
     style psp_track fill:#fdf3e3,stroke:#e8a838,stroke-width:2px
 ```
 
-### Gold layer: the star schema data mart
+### Gold layer: the star schema data mart (draft)
 
-Both tracks converge on the same **Kimball dimensional model**. It is really a **fact constellation** (multiple fact tables sharing conformed dimensions), not a single star: `dim_date` is conformed across all three facts and `dim_vehicle` is shared by shipment events and telemetry. `dim_customer` is historized as **SCD Type 2** (`start_at` / `end_at` / `is_current`), `dim_vehicle` as **SCD Type 1**, and `order_id` travels on `fact_shipment_event` as a **degenerate dimension** linking events back to the order grain.
+Both tracks converge on the same **Kimball dimensional model**. It is more of a **fact constellation** (multiple fact tables sharing conformed dimensions), not a single star: `dim_date` is conformed across all three facts and `dim_vehicle` is shared by shipment events and telemetry. `dim_customer` is historized as **SCD Type 2** (`start_at` / `end_at` / `is_current`), `dim_vehicle` as **SCD Type 1**, and `order_id` travels on `fact_shipment_event` as a **degenerate dimension** linking events back to the order grain.
 
 Grain, one line per fact: `fact_order_fulfillment` = one order; `fact_shipment_event` = one tracking event; `fact_vehicle_telemetry` = one vehicle per time window. Gold facts are shown in **gold**, dimensions in **blue**.
 
