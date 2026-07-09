@@ -236,7 +236,7 @@ flowchart LR
     class BRONZE bronze
 ```
 
-So every DLT and PySpark run is exercised against genuinely changing, imperfect input: schema evolution, quality quarantine, dedup and CDC upserts get tested continuously rather than against a one-time fixture.
+So every declarative pipeline and PySpark run is exercised against genuinely changing, imperfect input: schema evolution, quality quarantine, dedup and CDC upserts get tested continuously rather than against a one-time fixture.
 
 ---
 
@@ -330,7 +330,7 @@ The active environment is controlled by a single `env` variable in the bundle. C
 | **Continuous simulation** | Generator appends messy batches before each run; drift/bad/dupes tracked in an audit table with persistent schema-drift state |
 | **Lakeflow Declarative Pipelines** | Python `pyspark.pipelines` (`@dp.table`). Quality expectations, Auto CDC, dependency graph |
 | **Traditional PySpark** | Notebook-based Silver/Gold; explicit `OPTIMIZE`, Liquid Clustering, `VACUUM` |
-| **Data quality** | DLT expectations + manual validation; schema enforcement across both tracks |
+| **Data quality** | Declarative pipeline expectations + manual validation; schema enforcement across both tracks |
 | **Data modeling** | Data Vault Silver (declarative track) vs conformed SCD2 entities (PySpark track), both feeding a Kimball star schema Gold |
 | **Declarative Automation Bundles (DABs)** | All infrastructure declared in `databricks.yml`: jobs, pipelines, permissions |
 | **CI/CD** | GitHub Actions: automated test, deploy, and gated release pipeline |
@@ -365,7 +365,7 @@ Several of these are also limited or unavailable on Free Edition, so the scope r
 
 ## Key design decisions
 
-**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. DLT manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines.
+**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. The declarative pipeline manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines.
 
 **No DBFS, no mounts.** All storage is Unity Catalog tables and Volumes. Fine-grained access control, full lineage, no legacy path hacks.
 
