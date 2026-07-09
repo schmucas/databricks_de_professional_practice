@@ -14,11 +14,11 @@
 
 _Started as Databricks DE Professional exam practice, now grown into a production-style platform build._
 
-The project covers the **data engineering layer** end-to-end: multi-source ingestion, a medallion architecture built **twice** (once with **Lakeflow Declarative Pipelines**, formerly Delta Live Tables, once with **traditional PySpark**), and CI/CD that deploys to Databricks on every Git event with no manual steps. Each track models the data differently (Data Vault vs conformed SCD2 entities in Silver), and both converge on a Kimball star schema in Gold. Along the way: Change Data Capture, data quality, performance optimisation, and environment separation. Platform concerns like governance and infrastructure-as-code are intentionally out of scope (see below).
+This project covers the **data engineering layer** end-to-end, from ingestion through transformation (covering both **Spark Structured Streaming** and **batch** patterns) to automated deployment: ingestion from multiple source types (**JSON**, **delta lake**), medallion architecture built both ways with **Lakeflow Declarative Pipelines** and traditional **PySpark**, each track with its own modeling approach (Data Vault in Silver on the declarative track, conformed dimensional entities on the PySpark track, both converging on a **Kimball star schema data mart** in Gold), plus **Change Data Capture**, **data quality**, **performance optimisation**, **environment separation**, and a fully wired **CI/CD pipeline** that deploys automatically to Databricks with **Declarative Automation Bundles (DABs)** on every Git event, with no manual steps required. Platform concerns like governance and infrastructure-as-code are intentionally out of scope (see below).
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
 
-> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-40) below for the full breakdown.
+> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion, Silver Pyspark) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-40) below for the full breakdown.
 
 ## The data: SwissLogistics AG
 
