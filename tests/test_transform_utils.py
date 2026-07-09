@@ -1,5 +1,3 @@
-import hashlib
-
 from src.utils.transform_utils import generate_sk
 
 
