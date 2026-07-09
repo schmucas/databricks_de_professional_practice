@@ -34,3 +34,7 @@ def generate_sk(df: DataFrame, sk_name: str, column_list: list):
     return (hashed_df.select(
                 sk_name, *original_cols
             ))
+
+# COMMAND ----------
+def update_insert_update_ts(df: DataFrame):
+    return df.withColumn("_insert_update_ts", F.current_timestamp())
