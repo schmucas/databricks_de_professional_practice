@@ -14,11 +14,11 @@
 
 _Started as Databricks DE Professional exam practice, now grown into a production-style platform build._
 
-The project covers the **data engineering layer** end-to-end: multi-source ingestion, a medallion architecture built **twice** (once with **Lakeflow Declarative Pipelines**, formerly Delta Live Tables, once with **traditional PySpark**), and CI/CD that deploys to Databricks on every Git event with no manual steps. Each track models the data differently (Data Vault vs conformed SCD2 entities in Silver), and both converge on a Kimball star schema in Gold. Along the way: Change Data Capture, data quality, performance optimisation, and environment separation. Platform concerns like governance and infrastructure-as-code are intentionally out of scope (see below).
+This project covers the **data engineering layer** end-to-end, from ingestion through transformation (covering both **Spark Structured Streaming** and **batch** patterns) to automated deployment: ingestion from multiple source types (**JSON**, **delta lake**), medallion architecture built both ways with **Lakeflow Declarative Pipelines** and traditional **PySpark**, each track with its own modeling approach (**Data Vault** in Silver on the declarative track, conformed dimensional entities on the PySpark track, both converging on a **Kimball star schema** in the **Gold data mart**), plus **Change Data Capture**, **data quality**, **performance optimisation**, **environment separation**, and a fully wired **CI/CD pipeline** that deploys automatically to Databricks with **Declarative Automation Bundles (DABs)** on every Git event, with no manual steps required. Platform concerns like governance and infrastructure-as-code are intentionally out of scope (see below).
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
 
-> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-40) below for the full breakdown.
+> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion, Silver Pyspark) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-40) below for the full breakdown.
 
 ## The data: SwissLogistics AG
 
@@ -41,7 +41,7 @@ flowchart LR
     subgraph local["💻 Local development"]
         direction TB
         IDE(["VS Code +<br/>Databricks extension"])
-        BUNDLE[/"Asset bundle<br/>databricks.yml"/]
+        BUNDLE[/"DAB<br/>databricks.yml"/]
         IDE ==> BUNDLE
     end
 
@@ -236,7 +236,7 @@ flowchart LR
     class BRONZE bronze
 ```
 
-So every DLT and PySpark run is exercised against genuinely changing, imperfect input: schema evolution, quality quarantine, dedup and CDC upserts get tested continuously rather than against a one-time fixture.
+So every declarative pipeline and PySpark run is exercised against genuinely changing, imperfect input: schema evolution, quality quarantine, dedup and CDC upserts get tested continuously rather than against a one-time fixture.
 
 ---
 
@@ -289,7 +289,7 @@ flowchart TB
     style prod_cat  fill:#e9f7ef,stroke:#3dba6f,stroke-width:2px
 ```
 
-The active environment is controlled by a single `env` variable in the asset bundle. Catalog names, checkpoint paths, and source schemas all derive from it, with no hardcoded environment strings anywhere in the code.
+The active environment is controlled by a single `env` variable in the bundle. Catalog names, checkpoint paths, and source schemas all derive from it, with no hardcoded environment strings anywhere in the code.
 
 ---
 
@@ -299,7 +299,7 @@ The active environment is controlled by a single `env` variable in the asset bun
 
 | Component | Status |
 |---|---|
-| Repo structure & Databricks Asset Bundles | ✅ Done |
+| Repo structure & Declarative Automation Bundles | ✅ Done |
 | Git integration & CI/CD (PR checks → dev → stage → prod) | ✅ Done |
 | Environment separation (catalogs + bundle targets) | ✅ Done |
 | Source data generation (setup notebook) | ✅ Done |
@@ -328,11 +328,11 @@ The active environment is controlled by a single `env` variable in the asset bun
 | **Ingestion** | Structured Streaming from Delta (CDF) and JSON files in UC Volumes |
 | **Change Data Capture** | Full-load bootstrap + incremental CDC; CDF enabled on Bronze targets |
 | **Continuous simulation** | Generator appends messy batches before each run; drift/bad/dupes tracked in an audit table with persistent schema-drift state |
-| **Lakeflow Declarative Pipelines** | Formerly Delta Live Tables; Python `pyspark.pipelines` (`@dp.table`, legacy `@dlt.table` still works). Quality expectations, Auto CDC, dependency graph |
+| **Lakeflow Declarative Pipelines** | Python `pyspark.pipelines` (`@dp.table`). Quality expectations, Auto CDC, dependency graph |
 | **Traditional PySpark** | Notebook-based Silver/Gold; explicit `OPTIMIZE`, Liquid Clustering, `VACUUM` |
-| **Data quality** | DLT expectations + manual validation; schema enforcement across both tracks |
+| **Data quality** | Declarative pipeline expectations + manual validation; schema enforcement across both tracks |
 | **Data modeling** | Data Vault Silver (declarative track) vs conformed SCD2 entities (PySpark track), both feeding a Kimball star schema Gold |
-| **Asset bundles (DABs)** | All infrastructure declared in `databricks.yml`: jobs, pipelines, permissions |
+| **Declarative Automation Bundles (DABs)** | All infrastructure declared in `databricks.yml`: jobs, pipelines, permissions |
 | **CI/CD** | GitHub Actions: automated test, deploy, and gated release pipeline |
 | **Unity Catalog** | All data in UC tables and Volumes; no DBFS, no mounts |
 | **Environment separation** | Catalog-level separation (dev / stage / prod) in a single Free Edition workspace |
@@ -365,7 +365,7 @@ Several of these are also limited or unavailable on Free Edition, so the scope r
 
 ## Key design decisions
 
-**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. DLT manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines.
+**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. The declarative pipeline manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines.
 
 **No DBFS, no mounts.** All storage is Unity Catalog tables and Volumes. Fine-grained access control, full lineage, no legacy path hacks.
 
@@ -378,7 +378,7 @@ Several of these are also limited or unavailable on Free Edition, so the scope r
 | | |
 |---|---|
 | **Platform** | Databricks Free Edition (serverless + Unity Catalog) |
-| **Infrastructure as code** | Databricks Asset Bundles (DABs) |
+| **Infrastructure as code** | Declarative Automation Bundles (DABs) |
 | **Pipelines** | Lakeflow Declarative Pipelines (Python `@dp.table`) + traditional PySpark |
 | **Ingestion** | PySpark Structured Streaming |
 | **Storage** | Delta Lake on Unity Catalog |

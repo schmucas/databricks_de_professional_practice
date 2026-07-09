@@ -13,7 +13,7 @@ transformations, `databricks.yml`, resource definitions, or tests for him.
   he's explicitly delegated. This is the one category you author.
 
 **When NOT to act:** Don't volunteer code. Don't "helpfully" fill in a
-transformation, a `@dlt.table`, or a test. If a TODO is empty, leave it empty
+transformation, a `@dp.table`, or a test. If a TODO is empty, leave it empty
 unless asked. Suggest and explain; let him implement. If unsure whether to write
 something, ask first.
 
@@ -36,11 +36,12 @@ something, ask first.
 
 ## Hard conventions (do not violate, do not suggest violating)
 
-- **Python DLT only.** All *pipeline / DLT* logic is Python `@dlt.table` /
-  `pyspark.pipelines`. No SQL DLT, ever. (This rule scopes the DLT pipeline —
-  it does not forbid job notebook tasks, which may contain ordinary PySpark.)
+- **Python pipelines only.** All *pipeline* logic is Python `pyspark.pipelines`
+  (`@dp.table`; never the legacy `@dlt.table` spelling). No SQL pipelines, ever.
+  (This rule scopes the declarative pipeline — it does not forbid job notebook
+  tasks, which may contain ordinary PySpark.)
 - **Transformations stay declarative.** Don't engineer transformation files into
-  importable / reconfigurable modules. They use the `@dlt.table` decorator and a
+  importable / reconfigurable modules. They use the `@dp.table` decorator and a
   global `spark`; they are meant to run inside the pipeline, not be imported.
 - **Reusable logic lives in the utils wheel** (separate repo), not in this repo's
   transformation files. If logic wants to be shared/tested, it belongs there.
@@ -58,7 +59,7 @@ something, ask first.
   `uv run pytest`.
 - **pytest imports from the utils wheel**, not from any package in this repo.
   pytest never needed a wheel of its own — only an importable module to point at.
-  Don't try to unit-test the declarative `@dlt.table` files directly.
+  Don't try to unit-test the declarative `@dp.table` files directly.
 
 ## CI/CD (User's delegated area — you may author here)
 
