@@ -8,33 +8,53 @@ resources:
       parameters:
         - name: env
           default: ${var.env}
+        - name: initial_run
+          default: "False"
 
       tasks:
       # silver layer
         - task_key: silver_vehicles
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_scd1_vehicles.ipynb
+        
         - task_key: silver_shipment_events
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_shipment_events.ipynb
+        
         - task_key: silver_vehicle_telemetry
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_vehicle_telemetry.ipynb
+        
         - task_key: silver_customers
           notebook_task:
             notebook_path: ../src/classic_approach/silver/stream/silver_scd2_customers.ipynb
+        
         - task_key: silver_orders
           notebook_task:
             notebook_path: ../src/classic_approach/silver/stream/silver_scd2_orders.ipynb
-            
+
+        - task_key: silver_static_location_lookup_table
+          notebook_task:
+            notebook_path: ../src/classic_approach/silver/static/silver_static_location_lookup.ipynb
+          
+
       # gold layer
         - task_key: gold_dim_customer
           depends_on:
             - task_key: silver_customers
           notebook_task:
             notebook_path: ../src/classic_approach/gold/gold_dim_customer.ipynb
+        
         - task_key: gold_dim_vehicle
           depends_on:
             - task_key: silver_vehicles
           notebook_task:
-            notebook_path: ../src/classic_approach/gold/gold_dim_vehicle.ipynb
+            notebook_path: ../src/classic_approach/gold/gold_dim_vehicle.ipynb         
+        
+        - task_key: gold_dim_location
+          depends_on:
+            - task_key: setup_silver_static_location_lookup_table
+            - task_key: silver_orders
+          notebook_task:
+            notebook_path: ../src/classic_approach/gold/gold_dim_location.ipynb
+

@@ -36,5 +36,45 @@ def generate_sk(df: DataFrame, sk_name: str, column_list: list):
             ))
 
 # COMMAND ----------
-def update_insert_update_ts(df: DataFrame):
+def add_or_update_insert_update_ts(df: DataFrame):
+    """Add or overwrite a `_insert_update_ts` column with the current timestamp.
+
+    Args:
+        df: Source DataFrame.
+
+    Returns:
+        DataFrame with `_insert_update_ts` set to the timestamp at which this
+        transformation runs.
+    """
     return df.withColumn("_insert_update_ts", F.current_timestamp())
+
+# COMMAND ----------
+def add_normalized_str_col(df: DataFrame, col_to_normalize: str, col_name: str= "nrm_col")-> DataFrame:
+    """Add a lowercased, accent-stripped, alphanumeric-only version of a column.
+
+    Args:
+        df: Source DataFrame.
+        col_to_normalize: Name of the column to normalize.
+        col_name: Name of the new normalized column. Defaults to "nrm_col".
+
+    Note:
+        Only the accented Latin characters listed in the translate map are
+        folded to their unaccented equivalent; any other character outside
+        A-Z/a-z/0-9/space is dropped rather than transliterated.
+
+    Returns:
+        DataFrame with `col_name` added.
+    """
+    return df.withColumn(
+            col_name,
+            F.lower(
+                F.regexp_replace(
+                    F.translate(
+                        F.col(col_to_normalize),
+                        "àâäéèêëïîôöûüçÀÂÄÉÈÊËÏÎÔÖÛÜÇ",
+                        "aaaeeeeiioouucAAAEEEEIIOOUUC",
+                        ),
+                        "[^A-Za-z0-9 ]", ""
+                    )
+                )
+            )
