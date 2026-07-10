@@ -53,7 +53,7 @@ resources:
         
         - task_key: gold_dim_location
           depends_on:
-            - task_key: setup_silver_static_location_lookup_table
+            - task_key: silver_static_location_lookup_table
             - task_key: silver_orders
           notebook_task:
             notebook_path: ../src/classic_approach/gold/gold_dim_location.ipynb
