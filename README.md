@@ -18,7 +18,7 @@ This project covers the **data engineering layer** end-to-end, from ingestion th
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
 
-> 🚧 **Work in progress.** The platform foundation (repo structure, environment separation, CI/CD, and Bronze ingestion, Silver Pyspark) is in place. The data modeling blueprint, transformation layers, performance optimization, and quality management are next. See [**Project status**](#project-status-40) below for the full breakdown.
+> 🚧 **Work in progress.** See [**Project status**](#project-status) below for the full breakdown.
 
 ## The data: SwissLogistics AG
 
@@ -305,7 +305,7 @@ The active environment is controlled by a single `env` variable in the bundle. C
 
 ---
 
-## Project status: 50%
+## Project status
 
 `████████████░░░░░░░░░░░░░` **50% complete**
 
