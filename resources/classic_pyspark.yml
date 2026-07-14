@@ -87,3 +87,10 @@ resources:
           notebook_task:
             notebook_path: ../src/classic_approach/gold/gold_fact_vehicle_telemetry.ipynb
 
+        - task_key: gold_delete_customer_downstream
+          depends_on:
+            - task_key: gold_fact_order_fulfillment
+            - task_key: gold_dim_customer
+          notebook_task:
+            notebook_path: ../src/classic_approach/gold/gold_delete_customer_downstream.ipynb
+
