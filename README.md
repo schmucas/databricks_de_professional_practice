@@ -5,7 +5,7 @@
 ![PySpark](https://img.shields.io/badge/PySpark-E25A1C?logo=apachespark&logoColor=white)
 ![Delta Lake](https://img.shields.io/badge/Delta_Lake-00ADD4)
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
-![pytest](https://img.shields.io/badge/tests-planned-9aa3ad?logo=pytest&logoColor=white)
+![pytest](https://img.shields.io/badge/tests-in%20progress-F5A623?logo=pytest&logoColor=white)
 ![uv](https://img.shields.io/badge/packaging-uv-DE5FE9)
 ![status](https://img.shields.io/badge/status-work%20in%20progress-F5A623)
 ![progress](https://img.shields.io/badge/progress-50%25-F5A623)
