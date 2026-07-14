@@ -203,9 +203,7 @@ flowchart LR
 
 The diagrams above are the design; below is an actual run of the traditional PySpark track on **Databricks Free Edition (serverless)**. A single Databricks Job orchestrates the notebook tasks, so Silver builds first, then Gold fans out from it with the dependency graph enforced by the job (no manual ordering).
 
-![Classic PySpark Silver to Gold pipeline run in Databricks Jobs](docs/classic_pyspark_silver_gold_run.png)
-
-Reading the DAG left to right: the Silver tables (`silver_customers` SCD2, `silver_vehicles` SCD1, `silver_orders` SCD2, `silver_shipment_events`, `silver_vehicle_telemetry`, `silver_static_location_lookup`) feed the Gold dimensions (`gold_dim_date`, `gold_dim_customer`, `gold_dim_vehicle`, `gold_dim_location`), which in turn feed the three facts (`gold_fact_order_fulfillment`, `gold_fact_shipment_event`, `gold_fact_vehicle_telemetry`). The final `gold_delete_customer_downstream` step propagates hard deletes through the mart, closing the loop on the CDC story.
+![Classic PySpark Silver to Gold pipeline run in Databricks Jobs](docs/images/classic_pyspark_silver_gold_run.png)
 
 ---
 
@@ -245,6 +243,12 @@ flowchart LR
 ```
 
 So every declarative pipeline and PySpark run is exercised against genuinely changing, imperfect input: schema evolution, quality quarantine, dedup and CDC upserts get tested continuously rather than against a one-time fixture.
+
+### It runs: ingestion pipeline
+
+Here is an actual run of the ingestion path on **Databricks Free Edition (serverless)**: the incremental generator advances the `sl_ingest` sources, then Bronze picks up the fresh batch via Auto Loader with Change Data Feed enabled, so every downstream track reads the same freshly landed, deliberately messy input. This run was launched with the optional `DRIFT_THIS_RUN = true` job parameter, so it also exercises the deterministic schema-drift path (one new column added and then persisted for subsequent runs).
+
+![Ingestion pipeline run in Databricks Jobs](docs/images/ingestion_pipeline_run.png)
 
 ---
 
