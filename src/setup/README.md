@@ -1,6 +1,6 @@
 # Setup: source data generation
 
-Two notebooks build and maintain the SwissLogistics source data that the ingestion
+Two notebooks build and maintain the Shadowfax Logistics source data that the ingestion
 and pipeline tracks read from. Run `environment_setup` once, then run
 `incremental_data_generator` before each pipeline execution to add fresh, messy data.
 
@@ -28,11 +28,11 @@ audit table (see below).
 
 | Source | Location | Format | Notes |
 |---|---|---|---|
-| `customers` | `sl_ingest.{env}.customers` | Delta, CDF on | Current-state source (simulates Postgres), one row per customer; CDC feeds the warehouse SCD2 build |
+| `customers` | `sl_ingest.{env}.customers` | Delta, CDF on | Current-state source (simulates Postgres), one row per customer (named Middle-earth characters); CDC feeds the warehouse SCD2 build |
 | `orders` | `/Volumes/sl_ingest/{env}/landing/orders` | JSON files | File-based CDC feed: SNAPSHOT seed (50K full rows, ~2% NULL amounts), then INSERT (full rows) and sparse UPDATE drops; no deletes |
 | `shipment_events` | `/Volumes/sl_ingest/{env}/landing/shipment_events` | JSON files | High volume, dupes / late / bad records |
 | `telemetry` | `/Volumes/sl_ingest/{env}/landing/telemetry` | JSON files | Skewed 60% to 5 vehicles |
-| `vehicles` | `/Volumes/sl_ingest/{env}/landing/vehicles` | JSON files | Fleet master (200 vehicles); one-time seed plus rare full-row depot reassignments (SCD1) |
+| `vehicles` | `/Volumes/sl_ingest/{env}/landing/vehicles` | JSON files | Fleet master (200 pony carts, wains and cold wagons); one-time seed plus rare full-row depot reassignments (SCD1) |
 
 ## How updates work
 
