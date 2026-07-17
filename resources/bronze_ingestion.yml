@@ -9,6 +9,11 @@ resources:
       parameters:
         - name: env
           default: ${var.env}
+      
+      schedule:
+        quartz_cron_expression: "0 0 */3 * * ?"
+        timezone_id: "UTC"
+        pause_status: UNPAUSED
 
       tasks:
         - task_key: wait_for_incremental_source_load
