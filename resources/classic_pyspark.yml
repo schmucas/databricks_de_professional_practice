@@ -12,7 +12,7 @@ resources:
           default: "False"
       
       schedule:
-        quartz_cron_expression: "0 0 */6 * * ?"
+        quartz_cron_expression: "0 0 */12 * * ?"
         timezone_id: "UTC"
         pause_status: UNPAUSED
 

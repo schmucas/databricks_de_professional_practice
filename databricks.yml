@@ -39,6 +39,13 @@ targets:
       root_path: /Workspace/Shared/${bundle.target}/${bundle.name}
     variables:
       env: stage
+    resources:
+      jobs:
+        classic_pyspark_silver_gold:
+          schedule:
+            quartz_cron_expression: "0 0 1,13 * * ?"
+            timezone_id: "UTC"
+            pause_status: UNPAUSED
   prod:
     mode: production
     presets:
@@ -50,3 +57,10 @@ targets:
       root_path: /Workspace/Shared/${bundle.target}/${bundle.name}
     variables:
       env: prod
+    resources:
+      jobs:
+        classic_pyspark_silver_gold:
+          schedule:
+            quartz_cron_expression: "0 0 2,14 * * ?"
+            timezone_id: "UTC"
+            pause_status: UNPAUSED
