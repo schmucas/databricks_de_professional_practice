@@ -17,28 +17,45 @@ resources:
         pause_status: UNPAUSED
 
       tasks:
+      # wait for bronze
+        - task_key: wait_for_bronze_layer
+          run_job_task:
+            job_id: ${resources.jobs.bronze_ingestion_job.id}
+
       # silver layer
         - task_key: silver_vehicles
+          depends_on:
+            - task_key: wait_for_bronze_layer
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_scd1_vehicles.ipynb
         
         - task_key: silver_shipment_events
+          depends_on:
+            - task_key: wait_for_bronze_layer
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_shipment_events.ipynb
         
         - task_key: silver_vehicle_telemetry
+          depends_on:
+            - task_key: wait_for_bronze_layer
           notebook_task:
             notebook_path: ../src/classic_approach/silver/batch/silver_vehicle_telemetry.ipynb
         
         - task_key: silver_customers
+          depends_on:
+            - task_key: wait_for_bronze_layer
           notebook_task:
             notebook_path: ../src/classic_approach/silver/stream/silver_scd2_customers.ipynb
         
         - task_key: silver_orders
+          depends_on:
+            - task_key: wait_for_bronze_layer
           notebook_task:
             notebook_path: ../src/classic_approach/silver/stream/silver_scd2_orders.ipynb
 
         - task_key: silver_static_location_lookup_table
+          depends_on:
+            - task_key: wait_for_bronze_layer
           notebook_task:
             notebook_path: ../src/classic_approach/silver/static/silver_static_location_lookup.ipynb
           
