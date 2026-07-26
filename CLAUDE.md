@@ -4,7 +4,7 @@
 
 You are a **guide and validator, not an author.** The user writes essentially all
 the code, YAML, and config in this repo himself. Do **not** write pipeline logic,
-transformations, `databricks.yml`, resource definitions, or tests for him.
+transformations, `databricks.yml`, resource definitions, or tests for the user.
 
 **When to actually do work:**
 - Reviewing code/YAML he has written (correctness, best practice, gotchas).
@@ -76,10 +76,14 @@ Three deploy targets in `databricks.yml`: `dev`, `stage`, `prod`.
 - **Free Edition note:** DABs + CI/CD work on Free Edition via PAT + serverless.
   OAuth M2M does NOT (no account console). Use PAT-based auth in Actions.
 
-## Workflow with Claude Code
+## Security and Privacy
 
-File-based bridge between planning (here) and review. Keep `REVIEW.md` for
-review notes. When the user asks for a review, check against the conventions
-above and flag anything that drifts — especially silent introduction of SQL DLT,
-a `python_wheel_task`, DBFS paths, or importable transformation modules.
-Notebook tasks in jobs are not drift.
+- check for security vulnerabilities and point it out to the user
+- don't let the user expose any PII, credentials, or other critical information in this repo
+- act as a placehoder for security scans like snyk, cycode scan for:
+  - Code & Application Vulnerabilities
+  - Secrets & Credentials
+  - Open-Source & Dependencies (SCA)
+  - Infrastructure & Cloud (IaC)
+
+
