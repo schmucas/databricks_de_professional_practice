@@ -80,7 +80,7 @@ Three deploy targets in `databricks.yml`: `dev`, `stage`, `prod`.
 
 - check for security vulnerabilities and point it out to the user
 - don't let the user expose any PII, credentials, or other critical information in this repo
-- act as a placehoder for security scans like snyk, cycode scan for:
+- act as a placehoder for security scan software and scan for:
   - Code & Application Vulnerabilities
   - Secrets & Credentials
   - Open-Source & Dependencies (SCA)
