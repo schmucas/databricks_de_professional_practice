@@ -1,0 +1,17 @@
+# the environment setup job for databricks_de_professional_practice.
+
+resources:
+  jobs:
+    maintenance_job:
+      name: maintenance_job
+
+      parameters:
+        - name: env
+          default: ${var.env}
+        - name: optimize_full
+          default: 'False'
+
+      tasks:
+        - task_key: optimize_tables
+          notebook_task:
+            notebook_path: ../src/maintenance/optimize_tables.ipynb

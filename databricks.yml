@@ -43,7 +43,7 @@ targets:
       jobs:
         classic_pyspark_silver_gold:
           schedule:
-            quartz_cron_expression: "0 0 1,13 * * ?"
+            quartz_cron_expression: "0 0 2 * * ?"
             timezone_id: "UTC"
             pause_status: UNPAUSED
   prod:
@@ -61,6 +61,6 @@ targets:
       jobs:
         classic_pyspark_silver_gold:
           schedule:
-            quartz_cron_expression: "0 0 2,14 * * ?"
+            quartz_cron_expression: "0 0 4 * * ?"
             timezone_id: "UTC"
             pause_status: UNPAUSED
