@@ -41,9 +41,14 @@ targets:
       env: stage
     resources:
       jobs:
+        bronze_ingestion:
+          schedule:
+            quartz_cron_expression: "0 0 0 * * ?"
+            timezone_id: "UTC"
+            pause_status: UNPAUSED
         classic_pyspark_silver_gold:
           schedule:
-            quartz_cron_expression: "0 0 2 * * ?"
+            quartz_cron_expression: "0 0 1 * * ?"
             timezone_id: "UTC"
             pause_status: UNPAUSED
   prod:
@@ -59,8 +64,13 @@ targets:
       env: prod
     resources:
       jobs:
+        bronze_ingestion:
+          schedule:
+            quartz_cron_expression: "0 0 2 * * ?"
+            timezone_id: "UTC"
+            pause_status: UNPAUSED
         classic_pyspark_silver_gold:
           schedule:
-            quartz_cron_expression: "0 0 4 * * ?"
+            quartz_cron_expression: "0 0 3 * * ?"
             timezone_id: "UTC"
             pause_status: UNPAUSED
