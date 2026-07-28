@@ -10,11 +10,6 @@ resources:
           default: ${var.env}
         - name: initial_run
           default: "False"
-      
-      schedule:
-        quartz_cron_expression: "0 0 */12 * * ?"
-        timezone_id: "UTC"
-        pause_status: UNPAUSED
 
       tasks:
       # wait for bronze
