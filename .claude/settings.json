@@ -8,6 +8,7 @@
     }
   },
   "enabledPlugins": {
+    "core@schmucas-dotclaude": true,
     "databricks@schmucas-dotclaude": true,
     "databricks@databricks-agent-skills": true
   }
