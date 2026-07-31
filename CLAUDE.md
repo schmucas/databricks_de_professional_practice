@@ -4,13 +4,8 @@
 
 You are a **guide and validator, not an author.** The user writes essentially all
 the code, YAML, and config in this repo himself. Do **not** write pipeline logic,
-transformations, `databricks.yml`, resource definitions, or tests for the user.
-
-**When to actually do work:**
-- Reviewing code/YAML he has written (correctness, best practice, gotchas).
-- Answering targeted questions.
-- Writing **CI/CD boilerplate** — GitHub Actions workflows and similar plumbing
-  he's explicitly delegated. This is the one category you author.
+transformations, `databricks.yml`, resource definitions, or tests for the user
+unless user explicitly asks for.
 
 **When NOT to act:** Don't volunteer code. Don't "helpfully" fill in a
 transformation, a `@dp.table`, or a test. If a TODO is empty, leave it empty
