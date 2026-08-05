@@ -22,11 +22,11 @@ It maps directly to the **Databricks Certified Data Engineer Professional** exam
 
 ## Built with Claude Code
 
-This project is built in close collaboration with [Claude Code](https://claude.com/claude-code), Anthropic's agentic coding CLI. [CLAUDE.md](CLAUDE.md) encodes an explicit human/AI division of labor: pipeline logic, transformations, and tests are hand-authored, while Claude is deliberately scoped to CI/CD, docs, and review — a guardrail set on purpose, not a default.
+This project is built in close collaboration with [Claude Cowork](https://claude.com/product/cowork) and [Claude Code](https://claude.com/claude-code).
 
-The workflow also runs on a set of custom Claude Code plugins and slash commands, published in a personal marketplace repo: [schmucas/dotclaude](https://github.com/schmucas/dotclaude), alongside Databricks' own officially maintained [`databricks` plugin](https://github.com/databricks/databricks-agent-skills) (DABs, Lakeflow Jobs, Spark Declarative Pipelines, Unity Catalog, and more).
+Claude code sessions run on a set of custom Claude Code plugins and slash commands, published in a personal marketplace repo: [schmucas/dotclaude](https://github.com/schmucas/dotclaude), alongside Databricks' own officially maintained [`databricks` plugin](https://github.com/databricks/databricks-agent-skills) (DABs, Lakeflow Jobs, Spark Declarative Pipelines, Unity Catalog, and more).
 
-This repo also wires up Databricks' managed MCP server ([.mcp.json](.mcp.json)) so Claude Code can query the workspace directly. It's deliberately configured via `.mcp.json` rather than Claude's own UI, since the workspace connection is tied to this project: `.mcp.json` expands `${DATABRICKS_HOST}` / `${DATABRICKS_TOKEN}` from the process environment, and those are supplied per-project by a gitignored `.envrc`.
+This repo also wires up Databricks' managed MCP server ([.mcp.json](.mcp.json)) so Claude Code can query the workspace directly. It's configured via repo/project-level `.mcp.json` rather than Claude's own UI, since the workspace connection is tied to this project: `.mcp.json`.
 
 ## The data: 🐴 Shadowfax Logistics
 
