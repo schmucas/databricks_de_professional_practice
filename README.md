@@ -26,7 +26,7 @@ This project is built in close collaboration with [Claude Code](https://claude.c
 
 The workflow also runs on a set of custom Claude Code plugins and slash commands, published in a personal marketplace repo: [schmucas/dotclaude](https://github.com/schmucas/dotclaude), alongside Databricks' own officially maintained [`databricks` plugin](https://github.com/databricks/databricks-agent-skills) (DABs, Lakeflow Jobs, Spark Declarative Pipelines, Unity Catalog, and more).
 
-This repo also wires up Databricks' managed MCP server ([.mcp.json](.mcp.json)) so Claude Code can query the workspace directly. For it to connect, open VS Code from a terminal already `cd`'ed into the project root (`code .`), rather than launching it from the Dock/Start Menu/Finder — that's what makes the shell environment (and its Databricks auth variables) available to the MCP process.
+This repo also wires up Databricks' managed MCP server ([.mcp.json](.mcp.json)) so Claude Code can query the workspace directly. It's deliberately configured via `.mcp.json` rather than Claude's own UI, since the workspace connection is tied to this project: `.mcp.json` expands `${DATABRICKS_HOST}` / `${DATABRICKS_TOKEN}` from the process environment, and those are supplied per-project by a gitignored `.envrc`.
 
 ## The data: 🐴 Shadowfax Logistics
 
