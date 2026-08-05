@@ -2,6 +2,7 @@
 .vscode/
 .databricks/
 .claude/settings.local.json
+.envrc
 build/
 dist/
 __pycache__/
