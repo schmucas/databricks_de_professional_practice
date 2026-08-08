@@ -18,6 +18,8 @@ variables:
 targets:
   dev:
     mode: development
+    workspace:
+      host: https://dbc-17504633-4e33.cloud.databricks.com
     permissions:
     - user_name: ${var.workspace_user}
       level: CAN_MANAGE
