@@ -43,12 +43,12 @@ targets:
           schedule:
             quartz_cron_expression: "0 0 0 * * ?"
             timezone_id: "UTC"
-            pause_status: UNPAUSED
+            pause_status: PAUSED
         classic_pyspark_silver_gold:
           schedule:
             quartz_cron_expression: "0 0 1 * * ?"
             timezone_id: "UTC"
-            pause_status: UNPAUSED
+            pause_status: PAUSED
   prod:
     mode: production
     presets:
