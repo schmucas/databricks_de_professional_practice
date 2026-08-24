@@ -66,9 +66,9 @@ targets:
           schedule:
             quartz_cron_expression: "0 0 2 * * ?"
             timezone_id: "UTC"
-            pause_status: UNPAUSED
+            pause_status: PAUSED
         classic_pyspark_silver_gold:
           schedule:
             quartz_cron_expression: "0 0 3 * * ?"
             timezone_id: "UTC"
-            pause_status: UNPAUSED
+            pause_status: PAUSED
