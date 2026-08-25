@@ -49,6 +49,11 @@ targets:
             quartz_cron_expression: "0 0 1 * * ?"
             timezone_id: "UTC"
             pause_status: PAUSED
+        declarative_pipeline_silver_gold:
+          schedule:
+            quartz_cron_expression: "0 0 2 * * ?"
+            timezone_id: "UTC"
+            pause_status: PAUSED
   prod:
     mode: production
     presets:
@@ -70,5 +75,10 @@ targets:
         classic_pyspark_silver_gold:
           schedule:
             quartz_cron_expression: "0 0 3 * * ?"
+            timezone_id: "UTC"
+            pause_status: PAUSED
+        declarative_pipeline_silver_gold:
+          schedule:
+            quartz_cron_expression: "0 0 4 * * ?"
             timezone_id: "UTC"
             pause_status: PAUSED

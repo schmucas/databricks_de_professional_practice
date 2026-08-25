@@ -1,0 +1,47 @@
+# the declarative (Lakeflow) silver + gold pipeline for databricks_de_professional_practice.
+#
+# Track A counterpart to resources/classic_pyspark.yml. One pipeline covers both
+# layers, and the catalog is derived from env exactly as the classic notebooks
+# derive CATALOG = f"sl_{ENV}".
+#
+# Naming rule in src/: bare names resolve against the defaults below, so silver
+# datasets are bare and anything outside silver (bronze sources, gold targets)
+# is fully qualified. Changing `schema` here therefore moves the silver layer.
+
+resources:
+  pipelines:
+    declarative_silver_gold_pipeline:
+      name: declarative_silver_gold
+      catalog: sl_${var.env}
+      # default target for unqualified dataset names, which is the whole silver layer
+      schema: silver
+      serverless: true
+
+      # the only parameter the source files read, mirroring the classic `env`
+      # job parameter. Read with spark.conf.get("env"); pipelines have no widgets.
+      configuration:
+        env: ${var.env}
+
+      libraries:
+        - glob:
+            include: ../src/declarative_pipeline_approach/**
+
+    # no `environment.dependencies` block: the surrogate-key hash is restated in
+    # each gold file rather than imported from the utils wheel, so the pipeline
+    # has no external dependency to resolve or cache.
+
+  jobs:
+    declarative_pipeline_silver_gold:
+      name: declarative_pipeline_silver_gold
+
+      parameters:
+        - name: env
+          default: ${var.env}
+
+      tasks:
+        # one task: the pipeline resolves silver -> gold ordering itself, which is
+        # the whole point of the comparison against classic_pyspark.yml's
+        # hand-declared depends_on graph.
+        - task_key: refresh_declarative_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.declarative_silver_gold_pipeline.id}
