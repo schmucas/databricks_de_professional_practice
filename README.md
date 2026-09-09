@@ -8,13 +8,13 @@
 ![pytest](https://img.shields.io/badge/tests-in%20progress-F5A623?logo=pytest&logoColor=white)
 ![uv](https://img.shields.io/badge/packaging-uv-DE5FE9)
 ![status](https://img.shields.io/badge/status-work%20in%20progress-F5A623)
-![progress](https://img.shields.io/badge/progress-50%25-F5A623)
+![progress](https://img.shields.io/badge/progress-75%25-F5A623)
 
 > A production-grade data engineering project built on Databricks: fully automated, version-controlled, and running on the free tier.
 
 _Started as Databricks DE Professional exam practice, now grown into a production-style platform build._
 
-This project covers the **data engineering layer** end-to-end, from ingestion through transformation (covering both **Spark Structured Streaming** and **batch** patterns) to automated deployment: ingestion from multiple source types (**JSON**, **delta lake**), medallion architecture built both ways with **Lakeflow Declarative Pipelines** and traditional **PySpark**, each track with its own modeling approach (**Data Vault** in Silver on the declarative track, conformed dimensional entities on the PySpark track, both converging on a **Kimball star schema** in the Gold data mart), plus **Change Data Capture**, **data quality**, **performance optimisation**, **environment separation**, and a fully wired **CI/CD pipeline** that deploys automatically to Databricks with **Declarative Automation Bundles (DABs)** on every Git event, with no manual steps required. A built-in **incremental data generator** advances the sources before every run, simulating **messy data** (duplicates, bad records, late arrivals) and **schema drift**. Platform concerns like governance and infrastructure-as-code are intentionally out of scope (see below).
+This project covers the **data engineering layer** end-to-end, from ingestion through transformation (covering both **Spark Structured Streaming** and **batch** patterns) to automated deployment: ingestion from multiple source types (**JSON**, **delta lake**), medallion architecture built both ways with **Lakeflow Declarative Pipelines** and traditional **PySpark**, both tracks building the **same data model** (conformed, SCD2-historized Silver entities feeding a **Kimball star schema** Gold), so the two paradigms can be compared table for table, plus **Change Data Capture**, **data quality**, **performance optimisation**, **environment separation**, and a fully wired **CI/CD pipeline** that deploys automatically to Databricks with **Declarative Automation Bundles (DABs)** on every Git event, with no manual steps required. A built-in **incremental data generator** advances the sources before every run, simulating **messy data** (duplicates, bad records, late arrivals) and **schema drift**. Platform concerns like governance and infrastructure-as-code are intentionally out of scope (see below).
 
 It maps directly to the **Databricks Certified Data Engineer Professional** exam curriculum and reflects how modern data engineering teams work in practice.
 
@@ -126,7 +126,7 @@ One does not simply walk into prod: nothing deploys without passing the PR check
 
 ## Data pipeline: Bronze → Silver → Gold
 
-Data moves through three isolated layers, each with a clear responsibility. The transformation work from Silver to Gold is implemented **twice**, once with Declarative Pipelines and once with classic PySpark, covering both paradigms in depth. The two tracks also demonstrate **two data modeling approaches**: the declarative track builds a **Data Vault** style Silver (insert-only hubs, links, and satellites loaded via streaming tables), while the PySpark track builds **conformed, SCD2-historized entity tables** with explicit MERGE logic. Both converge on the same **Kimball star schema** design in Gold; the declarative track derives its SCD2 dimensions from the vault satellites via Auto CDC, so each track exercises a different historization technique end to end.
+Data moves through three isolated layers, each with a clear responsibility. The transformation work from Silver to Gold is implemented **twice**, once with Declarative Pipelines and once with classic PySpark, covering both paradigms in depth. Both tracks build the **same data model**: the same conformed, SCD2-historized Silver entities, and the same **Kimball star schema** in Gold, table for table. Holding the model constant is the point. It turns the exercise into a controlled comparison of the two paradigms rather than of two designs: the PySpark track historizes with hand-written `MERGE` logic inside `foreachBatch` and tunes the writes explicitly, while the declarative track expresses the same outcome as Auto CDC flows and quality expectations and hands the dependency graph, retries and backfills to the pipeline.
 
 ```mermaid
 flowchart LR
@@ -139,14 +139,14 @@ flowchart LR
         B["Full-fidelity record<br/>of every source event<br/><br/>CDF-enabled for<br/>downstream CDC"]
     end
 
-    subgraph dlt_track["🔷 TRACK A · LAKEFLOW DECLARATIVE PIPELINES · Data Vault"]
+    subgraph dlt_track["🔷 TRACK A · LAKEFLOW DECLARATIVE PIPELINES · declarative"]
         direction LR
-        SV1["🥈 Silver · Data Vault<br/>Hubs · Links · Satellites<br/>Quality expectations"]
-        G1["🥇 Gold · Star schema<br/>SCD2 dims via Auto CDC<br/>Materialized views"]
-        SV1 -->|"vault → star"| G1
+        SV1["🥈 Silver · Conformed entities<br/>SCD2 via Auto CDC flows<br/>Quality expectations"]
+        G1["🥇 Gold · Star schema<br/>Materialized views<br/>Pipeline-managed DAG"]
+        SV1 -->|"declarative"| G1
     end
 
-    subgraph psp_track["🔶 TRACK B · TRADITIONAL PYSPARK · dimensional"]
+    subgraph psp_track["🔶 TRACK B · TRADITIONAL PYSPARK · imperative"]
         direction LR
         SV2["🥈 Silver · Conformed entities<br/>SCD2 via MERGE · dedupe<br/>Schema enforced"]
         G2["🥇 Gold · Star schema<br/>Liquid Clustering<br/>OPTIMIZE · VACUUM"]
@@ -155,8 +155,8 @@ flowchart LR
 
     S1 -->|"Structured Streaming + CDF"| Bronze
     S2 -->|"Structured Streaming<br/>from Volumes"| Bronze
-    Bronze ==>|"modeled as<br/>raw vault"| SV1
-    Bronze ==>|"modeled as<br/>conformed entities"| SV2
+    Bronze ==>|"same model,<br/>declarative"| SV1
+    Bronze ==>|"same model,<br/>imperative"| SV2
 
     classDef bronze fill:#cd7f32,stroke:#8a5522,color:#fff
     classDef silver fill:#9aa3ad,stroke:#6b7280,color:#fff
@@ -172,7 +172,7 @@ flowchart LR
 
 ### Gold layer: the star schema data mart (draft)
 
-Both tracks converge on the same **Kimball dimensional model**. It is more of a **fact constellation** (multiple fact tables sharing conformed dimensions), not a single star: `dim_date` is conformed across all three facts and `dim_vehicle` is shared by shipment events and telemetry. `dim_customer` is historized as **SCD Type 2** (`start_at` / `end_at` / `is_current`), `dim_vehicle` as **SCD Type 1**, and `order_id` travels on `fact_shipment_event` as a **degenerate dimension** linking events back to the order grain.
+Both tracks build the same **Kimball dimensional model**, table for table. It is more of a **fact constellation** (multiple fact tables sharing conformed dimensions), not a single star: `dim_date` is conformed across all three facts and `dim_vehicle` is shared by shipment events and telemetry. `dim_customer` is historized as **SCD Type 2** (`start_at` / `end_at` / `is_current`), `dim_vehicle` as **SCD Type 1**, and `order_id` travels on `fact_shipment_event` as a **degenerate dimension** linking events back to the order grain.
 
 Grain, one line per fact: `fact_order_fulfillment` = one order; `fact_shipment_event` = one tracking event; `fact_vehicle_telemetry` = one vehicle per time window. Gold facts are shown in **gold**, dimensions in **blue**.
 
@@ -315,7 +315,7 @@ The active environment is controlled by a single `env` variable in the bundle. C
 
 ## Project status
 
-`████████████░░░░░░░░░░░░░` **50% complete**
+`███████████████████░░░░░░` **75% complete**
 
 | Component | Status |
 |---|---|
@@ -325,15 +325,15 @@ The active environment is controlled by a single `env` variable in the bundle. C
 | Source data generation (setup notebook) | ✅ Done |
 | 🥉 Bronze ingestion (Auto Loader + CDF) | ✅ Done |
 | 🔄 Incremental data generator | ✅ Done |
-| 🗺️ Data modeling blueprint (bus matrix → star + vault design) | 🚧 In progress |
+| 🗺️ Data modeling blueprint (bus matrix → star schema) | 🚧 In progress |
 | 🥈 Silver · Classic PySpark (conformed entities, SCD2) | ✅ Done |
 | 🥇 Gold · Classic PySpark (star schema) | ✅ Done |
 | ✔️ Validation · Classic PySpark path | 🚧 In progress |
-| 🥈 Silver · Lakeflow Declarative Pipelines (Data Vault) | ⬜ Planned |
-| 🥇 Gold · Lakeflow Declarative Pipelines (star schema) | ⬜ Planned |
+| 🥈 Silver · Lakeflow Declarative Pipelines (conformed entities, SCD2) | ✅ Done |
+| 🥇 Gold · Lakeflow Declarative Pipelines (star schema) | ✅ Done |
 | ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
-| Data quality / expectations | ⬜ Planned |
+| Data quality / expectations | 🚧 In progress |
 | 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
 | Dashboards | ⬜ Planned |
@@ -351,7 +351,7 @@ The active environment is controlled by a single `env` variable in the bundle. C
 | **Lakeflow Declarative Pipelines** | Python `pyspark.pipelines` (`@dp.table`). Quality expectations, Auto CDC, dependency graph |
 | **Traditional PySpark** | Notebook-based Silver/Gold; explicit `OPTIMIZE`, Liquid Clustering, `VACUUM` |
 | **Data quality** | Declarative pipeline expectations + manual validation; schema enforcement across both tracks |
-| **Data modeling** | Data Vault Silver (declarative track) vs conformed SCD2 entities (PySpark track), both feeding a Kimball star schema Gold |
+| **Data modeling** | Conformed, SCD2-historized Silver entities feeding a Kimball star schema Gold, identical across both tracks |
 | **Declarative Automation Bundles (DABs)** | All infrastructure declared in `databricks.yml`: jobs, pipelines, permissions |
 | **CI/CD** | GitHub Actions: automated test, deploy, and gated release pipeline |
 | **Unity Catalog** | All data in UC tables and Volumes; no DBFS, no mounts |
@@ -385,7 +385,9 @@ Several of these are also limited or unavailable on Free Edition, so the scope r
 
 ## Key design decisions
 
-**Dual-track Silver/Gold, two modeling approaches.** Building Silver and Gold twice is intentional, and the two tracks deliberately model the data differently. The declarative track loads a Data Vault style Silver (insert-only hubs, links, and satellites, a natural fit for streaming tables) and derives its star schema dimensions from the satellites with Auto CDC. The PySpark track builds conformed SCD2 entity tables with hand-written MERGE logic and an explicitly optimised star schema Gold. The declarative pipeline manages the dependency graph, retries, and CDC automatically; PySpark gives full control over optimisation and is what most teams still run for complex legacy pipelines.
+**Dual-track Silver/Gold, one data model.** Building Silver and Gold twice is intentional, and both tracks build the *same* model: the same conformed SCD2 Silver entities, the same star schema Gold, table for table. Holding the model fixed is what makes the comparison worth anything, otherwise the two tracks differ in design and paradigm at once and neither difference is legible. The PySpark track hand-writes SCD2 `MERGE` logic inside `foreachBatch` and tunes the writes explicitly with Liquid Clustering, `OPTIMIZE` and `VACUUM`. The declarative track expresses the same outcomes as Auto CDC flows and expectations, and hands the dependency graph, retries and backfills to the pipeline.
+
+Where the two diverge is the interesting part, and it shows up in specific tables. Source deletes need a dedicated cleanup notebook on the PySpark track (`gold_delete_customer_downstream`) and fall out of the Auto CDC flow for free on the declarative one. The skew hint that the telemetry fact relies on has no declarative equivalent. Neither paradigm wins outright, and being able to point at the exact table where each one is better is the reason for building both.
 
 **No DBFS, no mounts.** All storage is Unity Catalog tables and Volumes. Fine-grained access control, full lineage, no legacy path hacks.
 
