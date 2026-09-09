@@ -1,63 +1,8 @@
-"""
-Gold | dp_fact_order_fulfillment | declarative track
-
-Mirrors : src/classic_approach/gold/gold_fact_order_fulfillment.ipynb
-Sources : dp_scd2_orders (silver), dp_dim_customer, dp_dim_location, dp_dim_date
-Target  : dp_fact_order_fulfillment
-Grain   : one row per order  (PK order_id)
-
-This is the hardest table in the track. Two things happen at once.
-
-1. Status pivot.  Silver holds one SCD2 row per status change. Gold needs one
-   row per order with a timestamp column per status. The classic notebook does
-   this by projecting a <status>_ts column for each value in STATUS_LIST, then
-   taking last(ignorenulls) over an unbounded window partitioned by order_id
-   ordered by start_at, then dropDuplicates on order_id.
-   STATUS_LIST = picked_up, created, out_for_delivery, delivered,
-                 failed_delivery, in_transit, returned, confirmed
-
-2. SCD2-correct dimension lookup.  customer_sk is resolved as-of the order:
-        orders.start_at >= dim_customer.start_at
-    AND orders.start_at <  coalesce(dim_customer.end_at, <far future>)
-   All four dimension joins are LEFT joins, a missing dimension row must not
-   drop the fact.
-
-Foreign keys
-  customer_sk, orig_location_sk (origin_city), dest_location_sk (destination_city),
-  order_date_key (order_date), delivery_date_key (delivered_ts cast to date)
-
-Measures and flags
-  quantity, total_amount, payment_method, current_status,
-  confirmed_ts, picked_up_ts, in_transit_ts, out_for_delivery_ts, delivered_ts,
-  order_date, delivery_date,
-  delivery_days = datediff(delivery_date, order_date),
-  is_on_time    = delivery_days <= 30
-  plus product_code and product_name
-
-Deletes: the classic track needs a separate notebook to erase rows for deleted
-customers. On this track the silver auto CDC flow already applies the delete,
-so the fact simply stops seeing that customer on refresh. Do not port
-gold_delete_customer_downstream.ipynb, that is the point of the comparison.
-
-Translating start_at to this track
-  Orders sequence by _change_ts, a plain timestamp, so orders.__START_AT IS the
-  classic orders.start_at, same type and same value.
-  Customers sequence by struct(last_updated, _commit_version), so the customer
-  side of the as-of predicate is __START_AT.last_updated, reached with
-  .getField() rather than dotted string paths so the alias qualifier stays
-  unambiguous.
-  One semantic nicety: the classic end_at is INCLUSIVE (next_start minus 1 ms)
-  and is compared with a strict <, while __END_AT is EXCLUSIVE. Strict < against
-  an exclusive bound is the canonical form, so the two agree everywhere except
-  inside that 1 ms sliver.
-"""
-
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 from pyspark.sql.types import DateType
 from pyspark.sql.window import Window
 
-# --- config -----------------------------------------------------------------
 ENV = spark.conf.get("env")
 CATALOG = f"sl_{ENV}"
 
@@ -85,7 +30,6 @@ STATUS_LIST = [
 ]
 
 
-# --- status pivot -----------------------------------------------------------
 @dp.temporary_view(name=PIVOT_VIEW)
 def dp_order_status_pivot():
     """Collapse the SCD2 order history into one row per order.
@@ -126,7 +70,6 @@ def dp_order_status_pivot():
     )
 
 
-# --- target -----------------------------------------------------------------
 @dp.materialized_view(
     name=TARGET_FQN,
     comment="Order fulfillment fact, one row per order, with as-of customer and conformed dimensions.",
@@ -179,9 +122,6 @@ def dp_fact_order_fulfillment():
     """
     pivoted_orders = spark.read.table(PIVOT_VIEW)
     dim_customers_df = spark.read.table(DIM_CUSTOMER_FQN)
-    # Read the location and date dimensions twice rather than aliasing one
-    # DataFrame into two, so the origin/destination and order/delivery joins
-    # cannot collide on self-join ambiguity.
     dim_origin_df = spark.read.table(DIM_LOCATION_FQN)
     dim_destination_df = spark.read.table(DIM_LOCATION_FQN)
     dim_order_date_df = spark.read.table(DIM_DATE_FQN)
@@ -234,15 +174,3 @@ def dp_fact_order_fulfillment():
         .withColumn("delivery_days", F.datediff(F.col("delivery_date"), F.col("order_date")))
         .withColumn("is_on_time", F.when(F.col("delivery_days") <= 30, F.lit(True)).otherwise(F.lit(False)))
     )
-
-
-# Paradigm note
-#   The pivot is identical on both tracks, because it is ordinary Spark and
-#   declarative has nothing to add to a window function. Everything around it
-#   changes: classic reads a date window, joins that back to the full silver
-#   table to recover each touched order's whole history, then MERGEs on order_id,
-#   and needs gold_delete_customer_downstream.ipynb afterwards to chase deleted
-#   customers out. Here the fact is simply defined as a function of silver, so
-#   the erasure notebook has nothing to do and does not exist.
-#   The cost is the usual one: a full recompute of 50k+ orders per refresh where
-#   classic touches only the orders that moved.

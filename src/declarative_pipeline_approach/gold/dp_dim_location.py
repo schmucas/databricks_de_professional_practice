@@ -1,42 +1,8 @@
-"""
-Gold | dp_dim_location | declarative track
-
-Mirrors : src/classic_approach/gold/gold_dim_location.ipynb
-Sources : dp_scd2_orders (silver), dp_static_location_lookup (silver)
-Target  : dp_dim_location
-
-Parity notes
-  - collects distinct cities from BOTH order columns (origin_city, destination_city),
-    dropping nulls and empty strings, then unions and dedupes them
-  - joins the lookup on a normalized city string (the classic add_normalized_str_col
-    helper), not on the raw value
-  - cities with no lookup match become 'unknown' rather than being dropped
-  - broadcast the lookup, it is 26 rows
-  - location_sk = surrogate key hashed from (city)
-  - columns: location_sk, city, realm_name, realm_code, region, language_region
-
-Careful: the classic notebook had a bug here once, reading a stale lookup
-table name. Point the source at dp_static_location_lookup.
-
-Two behaviours of the classic notebook are reproduced deliberately, not
-accidentally, because changing either would break the A/B comparison:
-
-  1. The null/empty filter is a single AND across both columns, so an order with
-     a blank destination_city contributes NEITHER city, not just the blank one.
-     The generator injects blank destinations at about 1 percent.
-  2. Unmatched cities all collapse to one row. city is overwritten with
-     'unknown' before dropDuplicates, so every city missing from the lookup ends
-     up as the same ('unknown', NULL, NULL, NULL, NULL) row and the actual city
-     name is lost. Downstream, the fact joins on city, so those orders resolve
-     to a NULL location_sk rather than to the 'unknown' row.
-"""
-
 from pyspark import pipelines as dp
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.types import StringType
 
-# --- config -----------------------------------------------------------------
 ENV = spark.conf.get("env")
 CATALOG = f"sl_{ENV}"
 
@@ -46,7 +12,6 @@ TARGET_TABLE = "dp_dim_location"
 TARGET_FQN = f"{CATALOG}.gold.{TARGET_TABLE}"
 
 
-# --- helpers ----------------------------------------------------------------
 def _generate_sk(df: DataFrame, sk_name: str, column_list: list) -> DataFrame:
     """Add an MD5 surrogate key column computed from the given columns.
 
@@ -106,7 +71,6 @@ def _add_normalized_str_col(df: DataFrame, col_to_normalize: str, col_name: str 
     )
 
 
-# --- target -----------------------------------------------------------------
 @dp.materialized_view(
     name=TARGET_FQN,
     comment="Location dimension: distinct order cities enriched from the static Middle-earth lookup.",
@@ -163,14 +127,3 @@ def dp_dim_location():
     return location_df.transform(_generate_sk, "location_sk", ["city"]).withColumn(
         "_insert_update_ts", F.current_timestamp()
     )
-
-
-# Paradigm note
-#   This is the table where declarative quietly fixes a real defect. Classic
-#   reads only the orders touched in its START_DATE/END_DATE window, so a city
-#   that stops appearing in new orders keeps its stale dimension row forever, and
-#   a mis-set window silently narrows the dimension. The materialized view is
-#   defined against all of silver, so the dimension is a pure function of the
-#   data rather than of when the job last ran.
-#   What is NOT fixed is the union filter and the collapsed 'unknown' row above.
-#   Those are logic bugs, and declarative has no opinion about logic.

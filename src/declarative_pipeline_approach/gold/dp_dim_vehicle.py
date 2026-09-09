@@ -1,26 +1,8 @@
-"""
-Gold | dp_dim_vehicle | declarative track
-
-Mirrors : src/classic_approach/gold/gold_dim_vehicle.ipynb
-Source  : dp_scd1_vehicles  (silver)
-Target  : dp_dim_vehicle  (SCD Type 1 dimension)
-
-Parity notes
-  - vehicle_sk = surrogate key hashed from (vehicle_id)
-  - current state only, no start_at / end_at / is_current
-  - business columns: vehicle_id, plate_number, model, vehicle_type, capacity_kg,
-                      cold_chain_capable, home_depot, commissioned_date
-
-The thinnest table in the track: silver already holds current state, so gold
-adds a surrogate key and nothing else.
-"""
-
 from pyspark import pipelines as dp
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.types import StringType
 
-# --- config -----------------------------------------------------------------
 ENV = spark.conf.get("env")
 CATALOG = f"sl_{ENV}"
 
@@ -29,7 +11,6 @@ TARGET_TABLE = "dp_dim_vehicle"
 TARGET_FQN = f"{CATALOG}.gold.{TARGET_TABLE}"
 
 
-# --- surrogate key ----------------------------------------------------------
 def _generate_sk(df: DataFrame, sk_name: str, column_list: list) -> DataFrame:
     """Add an MD5 surrogate key column computed from the given columns.
 
@@ -58,7 +39,6 @@ def _generate_sk(df: DataFrame, sk_name: str, column_list: list) -> DataFrame:
     return hashed_df.select(sk_name, *original_cols)
 
 
-# --- target -----------------------------------------------------------------
 @dp.materialized_view(
     name=TARGET_FQN,
     comment="Vehicle dimension, SCD Type 1, keyed by an md5 surrogate on vehicle_id.",
@@ -90,12 +70,3 @@ def dp_dim_vehicle():
         .transform(_generate_sk, "vehicle_sk", ["vehicle_id"])
         .withColumn("_insert_update_ts", F.current_timestamp())
     )
-
-
-# Paradigm note
-#   Identical output, opposite mechanics: classic MERGEs the batch it happens to
-#   have read into whatever gold already holds, so gold is only as correct as the
-#   window the job was handed. The materialized view derives gold from all of
-#   silver every time, which makes a wrong START_DATE unable to corrupt it.
-#   The surrogate key is the one thing declarative does not simplify: the hash
-#   had to be copied here because %run has no pipeline equivalent.

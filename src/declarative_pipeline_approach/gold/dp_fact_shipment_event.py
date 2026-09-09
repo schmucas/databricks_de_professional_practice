@@ -1,41 +1,6 @@
-"""
-Gold | dp_fact_shipment_event | declarative track
-
-Mirrors : src/classic_approach/gold/gold_fact_shipment_event.ipynb
-Sources : dp_shipment_events (silver), dp_dim_vehicle, dp_dim_date
-Target  : dp_fact_shipment_event
-Grain   : one row per tracking event  (PK event_id)
-
-Parity notes
-  - joins dim_vehicle on vehicle_id and dim_date on event_date, both LEFT
-  - order_id rides along as a degenerate dimension, there is no order FK here
-  - every other silver column passes through unchanged
-  - drops the silver bookkeeping timestamp column
-
-The append-only fact: silver is already deduplicated and never updates,
-so this can be a streaming table rather than a materialized view. Worth
-being deliberate about that choice, an interviewer will ask why.
-
-Being deliberate about it lands on materialized view, not streaming table, and
-the docstring premise is the thing to challenge. dp_shipment_events is an auto
-CDC target, so it is NOT append-only: a duplicate event_id arriving in a later
-batch rewrites the row that already won. A streaming read of it therefore fails
-outright unless it carries skipChangeCommits=true, and with that option set the
-fact would keep the superseded row forever. The dimensions are recomputed
-materialized views too, so a streaming fact would also pin stale surrogate keys.
-
-Known parity gap, agreed deliberately: the classic notebook aliases its
-pass-through columns to "main.<name>", so the classic table's columns are
-literally named `main.event_timestamp`, `main.latitude` and so on. That is a
-typo for F.col(f"main.{c}"), which is what the telemetry fact does correctly.
-This track uses the clean names. Until the classic notebook is patched, the two
-fact tables differ in column NAMING (not in values, types, or order).
-"""
-
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-# --- config -----------------------------------------------------------------
 ENV = spark.conf.get("env")
 CATALOG = f"sl_{ENV}"
 
@@ -48,7 +13,6 @@ TARGET_TABLE = "dp_fact_shipment_event"
 TARGET_FQN = f"{CATALOG}.gold.{TARGET_TABLE}"
 
 
-# --- target -----------------------------------------------------------------
 @dp.materialized_view(
     name=TARGET_FQN,
     comment="Shipment tracking event fact, one row per event_id, conformed to dim_vehicle and dim_date.",
@@ -96,12 +60,3 @@ def dp_fact_shipment_event():
             *[F.col(f"main.{c}") for c in silver_shipment_df.columns if c != "event_id"],
         )
     )
-
-
-# Paradigm note
-#   The interesting answer here is that "append-only fact, so make it a streaming
-#   table" is the wrong instinct once silver is an auto CDC target: auto CDC
-#   rewrites rows, and a streaming reader either errors or has to be told to
-#   ignore exactly the corrections that make silver worth reading.
-#   The cost of the materialized view is honest and real: classic MERGEs only the
-#   events in its window, this recomputes the whole fact from silver every run.

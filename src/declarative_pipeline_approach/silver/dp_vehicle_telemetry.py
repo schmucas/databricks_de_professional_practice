@@ -1,51 +1,10 @@
-"""
-Silver | dp_vehicle_telemetry | declarative track
-
-Mirrors : src/classic_approach/silver/batch/silver_vehicle_telemetry.ipynb
-          (plus silver_vehicle_telemetry_transforms.py)
-Source  : bronze.vehicle_telemetry_raw  (IoT, at-least-once delivery, Auto Loader)
-Target  : dp_vehicle_telemetry  (append-only, deduplicated, enriched)
-
-Parity notes, normalize step
-  - filters reading_id IS NULL, dedupe key is reading_id (timestamps are NOT unique)
-  - casts: reading_timestamp TIMESTAMP, cargo_temp_c DOUBLE, engine_temp_c DOUBLE,
-           fuel_pct DOUBLE, odometer_km INT, speed_kmh DOUBLE
-  - out-of-range sensor values become NULL:
-        cargo_temp_c  outside [-273, 100]
-        engine_temp_c outside [0, 200]
-        speed_kmh     outside [0, 180]
-
-Parity notes, enrich step
-  - is_cold_chain_cargo = cargo_temp_c IS NOT NULL
-  - speed_limit_exceed  = speed_kmh > 120
-  - engine_overheat     = engine_temp_c > 110
-  - reading_date        = to_date(reading_timestamp)
-
-The classic track puts the range checks in Python and keeps the row.
-The declarative version should express them as expectations, so the same
-rules also show up as pipeline data-quality metrics.
-
-That needs two views, not one. The expectations sit on the cast-only view, where
-the out-of-range values still exist and can be counted; the second view then
-nulls them out exactly as the classic transform does. Nulling first would make
-the expectations unfalsifiable, and every range check would report 100 percent
-pass on data the classic track knows is bad.
-
-Like dp_shipment_events, the classic dedupe is ascending (earliest
-reading_timestamp per reading_id wins), so the flow sequences by a negated
-event time.
-"""
-
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, IntegerType
 
-# --- config -----------------------------------------------------------------
 ENV = spark.conf.get("env")
 CATALOG = f"sl_{ENV}"
 
-# bronze is not the pipeline default schema, so it is qualified; silver is, so
-# the target is named bare.
 SOURCE_TABLE = f"{CATALOG}.bronze.vehicle_telemetry_raw"
 TARGET_TABLE = "dp_vehicle_telemetry"
 
@@ -53,8 +12,6 @@ CAST_VIEW = "dp_vehicle_telemetry_cast"
 SOURCE_VIEW = "dp_vehicle_telemetry_changes"
 DEDUPE_SEQ = "_dedupe_seq"
 
-# Sensor plausibility ranges, identical to the classic normalize step. NULL passes:
-# roughly 70 percent of readings carry no cargo_temp_c at all and that is expected.
 SENSOR_RANGE_EXPECTATIONS = {
     "cargo_temp_c_in_range": "cargo_temp_c IS NULL OR cargo_temp_c BETWEEN -273 AND 100",
     "engine_temp_c_in_range": "engine_temp_c IS NULL OR engine_temp_c BETWEEN 0 AND 200",
@@ -62,7 +19,6 @@ SENSOR_RANGE_EXPECTATIONS = {
 }
 
 
-# --- source views -----------------------------------------------------------
 @dp.temporary_view(name=CAST_VIEW)
 @dp.expect_all(SENSOR_RANGE_EXPECTATIONS)
 def dp_vehicle_telemetry_cast():
@@ -110,7 +66,6 @@ def dp_vehicle_telemetry_changes():
     """
     return (
         spark.readStream.table(CAST_VIEW)
-        # normalize: implausible sensor values become NULL, the row is kept
         .withColumn(
             "cargo_temp_c",
             F.when((F.col("cargo_temp_c") < -273) | (F.col("cargo_temp_c") > 100), F.lit(None)).otherwise(
@@ -127,7 +82,6 @@ def dp_vehicle_telemetry_changes():
             "speed_kmh",
             F.when((F.col("speed_kmh") < 0) | (F.col("speed_kmh") > 180), F.lit(None)).otherwise(F.col("speed_kmh")),
         )
-        # enrich
         .withColumn(
             "is_cold_chain_cargo",
             F.when(F.col("cargo_temp_c").isNotNull(), True).otherwise(F.lit(False)),
@@ -140,7 +94,6 @@ def dp_vehicle_telemetry_changes():
     )
 
 
-# --- target -----------------------------------------------------------------
 dp.create_streaming_table(
     name=TARGET_TABLE,
     comment="Vehicle telemetry readings, range-corrected and deduplicated on reading_id.",
@@ -156,12 +109,3 @@ dp.create_auto_cdc_flow(
     stored_as_scd_type=1,
     except_column_list=[DEDUPE_SEQ],
 )
-
-
-# Paradigm note
-#   Classic nulls a bad sensor value and moves on; nobody downstream can tell a
-#   sensor fault from a reading that was legitimately absent. Expectations keep
-#   the same output but publish the counts, so "engine_temp_c went out of range
-#   4,000 times today" becomes visible without writing a single audit query.
-#   What declarative will not give back is the skew hint the gold aggregate needs
-#   (see dp_fact_vehicle_telemetry): the planner is not ours to steer here.

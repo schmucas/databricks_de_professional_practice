@@ -1,49 +1,7 @@
-"""
-Gold | dp_fact_vehicle_telemetry | declarative track
-
-Mirrors : src/classic_approach/gold/gold_fact_vehicle_telemetry.ipynb
-Sources : dp_vehicle_telemetry (silver), dp_dim_vehicle, dp_dim_date
-Target  : dp_fact_vehicle_telemetry
-Grain   : one row per vehicle per hour  (PK vehicle_id + period_start_timestamp)
-
-Aggregation, verbatim from the classic notebook
-  period_start_timestamp = date_trunc('hour', reading_timestamp)
-  group by vehicle_id, period_start_timestamp:
-    readings_count    = count(reading_id)
-    avg_speed_kmh     = round(avg(speed_kmh))
-    max_speed_kmh     = max(speed_kmh)
-    min_odometer_km   = min(odometer_km)      -- intermediate only
-    max_odometer_km   = max(odometer_km)      -- intermediate only
-    avg_fuel_pct      = round(avg(fuel_pct), 2)
-    avg_engine_temp_c = round(avg(engine_temp_c))
-    min_cargo_temp_c  = min(cargo_temp_c)
-    max_cargo_temp_c  = max(cargo_temp_c)
-    vehicle_idle      = sum(vehicle_status NOT IN ('idle','maintenance'))
-
-Derived
-  km_driven       = max_odometer_km - min_odometer_km
-  utilization_pct = round(vehicle_idle / readings_count, 2)
-  period_date     = period_start_timestamp cast to date
-  then drop min_odometer_km, max_odometer_km, vehicle_idle
-
-Then LEFT join dim_vehicle on vehicle_id and dim_date on period_date.
-
-Skew: 60 percent of readings come from 5 vehicles. The classic notebook
-carries an explicit hint('skew', 'vehicle_id'). The declarative version
-does not get to hand-tune that, which is a real trade-off and a good
-answer to "when would you not use declarative pipelines".
-
-Note that vehicle_idle is named for what it is not: the sum counts readings
-whose status is NEITHER idle NOR maintenance, so it is the ACTIVE reading count,
-and utilization_pct is therefore the active share. Copied as-is, misleading name
-included, because renaming it would break the comparison.
-"""
-
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 from pyspark.sql.types import DateType
 
-# --- config -----------------------------------------------------------------
 ENV = spark.conf.get("env")
 CATALOG = f"sl_{ENV}"
 
@@ -58,7 +16,6 @@ TARGET_FQN = f"{CATALOG}.gold.{TARGET_TABLE}"
 HOURLY_VIEW = "dp_telemetry_hourly"
 
 
-# --- hourly aggregate -------------------------------------------------------
 @dp.temporary_view(name=HOURLY_VIEW)
 def dp_telemetry_hourly():
     """Aggregate silver telemetry readings to one row per vehicle per hour.
@@ -93,7 +50,6 @@ def dp_telemetry_hourly():
     )
 
 
-# --- target -----------------------------------------------------------------
 @dp.materialized_view(
     name=TARGET_FQN,
     comment="Hourly vehicle telemetry fact, conformed to dim_vehicle and dim_date.",
@@ -147,15 +103,3 @@ def dp_fact_vehicle_telemetry():
             ],
         )
     )
-
-
-# Paradigm note
-#   This is the one table where declarative is strictly worse, and it is worth
-#   saying so plainly. The classic notebook carries hint('skew', 'vehicle_id')
-#   because 60 percent of readings belong to 5 of 200 vehicles; that hint is
-#   dropped here because the pipeline owns the plan and serverless leaves skew to
-#   AQE. AQE usually handles it, but "usually" is not a knob, and there is no
-#   place to put one.
-#   The honest summary of the whole track: declarative wins wherever the work is
-#   bookkeeping (CDC, dedupe, dependency order, incremental windows) and loses
-#   wherever the work is performance engineering.
