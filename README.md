@@ -8,7 +8,7 @@
 ![pytest](https://img.shields.io/badge/tests-in%20progress-F5A623?logo=pytest&logoColor=white)
 ![uv](https://img.shields.io/badge/packaging-uv-DE5FE9)
 ![status](https://img.shields.io/badge/status-work%20in%20progress-F5A623)
-![progress](https://img.shields.io/badge/progress-50%25-F5A623)
+![progress](https://img.shields.io/badge/progress-75%25-F5A623)
 
 > A production-grade data engineering project built on Databricks: fully automated, version-controlled, and running on the free tier.
 
@@ -315,7 +315,7 @@ The active environment is controlled by a single `env` variable in the bundle. C
 
 ## Project status
 
-`████████████░░░░░░░░░░░░░` **50% complete**
+`███████████████████░░░░░░` **75% complete**
 
 | Component | Status |
 |---|---|
@@ -329,11 +329,11 @@ The active environment is controlled by a single `env` variable in the bundle. C
 | 🥈 Silver · Classic PySpark (conformed entities, SCD2) | ✅ Done |
 | 🥇 Gold · Classic PySpark (star schema) | ✅ Done |
 | ✔️ Validation · Classic PySpark path | 🚧 In progress |
-| 🥈 Silver · Lakeflow Declarative Pipelines (conformed entities, SCD2) | ⬜ Planned |
-| 🥇 Gold · Lakeflow Declarative Pipelines (star schema) | ⬜ Planned |
+| 🥈 Silver · Lakeflow Declarative Pipelines (conformed entities, SCD2) | ✅ Done |
+| 🥇 Gold · Lakeflow Declarative Pipelines (star schema) | ✅ Done |
 | ✔️ Validation · Lakeflow Declarative Pipelines path | ⬜ Planned |
 | Performance Optimization | ⬜ Planned |
-| Data quality / expectations | ⬜ Planned |
+| Data quality / expectations | 🚧 In progress |
 | 🧪 Unit tests (pytest) | 🚧 In progress |
 | Integration tests | ⬜ Planned |
 | Dashboards | ⬜ Planned |
